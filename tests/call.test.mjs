@@ -29,12 +29,16 @@ test('call goes only to the server-configured number, and secrets never reach th
   });
   assert.deepEqual(await result.json(), { requested: true });
 });
-test('provider rejection stays an error without exposing its private response', async () => {
+test('provider rejection shows a plain message; the status code goes to the logs only', async t => {
+  const logged = t.mock.method(console, 'error', () => {});
   const result = await handleCall(request(), env, async () => Response.json({ detail: 'secret' }, { status: 422 }));
   const body = await result.json();
   assert.equal(body.uncertain, false);
-  assert.match(body.message, /422/);
-  assert.doesNotMatch(JSON.stringify(body), /secret/);
+  assert.equal(body.message, 'Couldn’t place the call. Try again.');
+  assert.doesNotMatch(JSON.stringify(body), /422|secret/);
+  assert.equal(logged.mock.callCount(), 1);
+  assert.match(logged.mock.calls[0].arguments[0], /422/);
+  assert.doesNotMatch(logged.mock.calls[0].arguments[0], /secret/);
 });
 test('missing attempt confirmation and connection errors remain unconfirmed', async () => {
   for (const fetcher of [async () => Response.json({}), async () => { throw new Error('network failure'); }]) {

@@ -39,8 +39,10 @@ export async function handleCall(request, env, fetcher = fetch, timeoutMs = 1000
     // Raw provider responses can contain private settings: never forward or log them.
     if (!response.ok) {
       const uncertain = response.status >= 500;
+      // The status code goes to the Convex logs only; the page shows a plain message.
+      if (!uncertain) console.error(`Sarvam rejected the call request (${response.status}).`);
       return json({
-        message: uncertain ? 'We couldn’t confirm the call request.' : `Sarvam rejected the call request (${response.status}). Check the calling settings before trying again.`,
+        message: uncertain ? 'We couldn’t confirm the call request.' : 'Couldn’t place the call. Try again.',
         uncertain,
       }, 502);
     }
