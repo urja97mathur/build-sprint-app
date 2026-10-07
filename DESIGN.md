@@ -2,19 +2,40 @@
 
 Read this before building or changing any screen. If a choice isn't covered here, ask me instead of guessing.
 
-## Current phone-call test — 2026-10-06
+## Call page (real phone call) — updated 2026-10-07
 
-The builder authorized a small private real-phone-call test. For this test only: white screen, existing type and charcoal button, headline “A voice with you on your walk.”, explanation “Tap below. Your phone will ring. Answer to talk with your AI companion.”, button “Call me”, and “Demo only. No alerts or location sharing.” The actual conversation occurs on the phone's call screen, not the orb page.
+The product uses a real phone call: she taps “Call me”, her phone rings, she answers, and the conversation happens on her phone's call screen, not on the page. The private call page is the only screen built so far. White screen. Top to bottom:
 
-Empty: “Ready when you are.” Loading: “Asking your AI companion to call you…” Requested: “Call requested. Answer when your phone rings. This doesn’t confirm the call connected.” Missing configuration: “The calling connection isn’t set up yet. Your phone won’t ring until it’s connected.” Unconfirmed: “We couldn’t confirm the call request. It may still ring. Check your phone and Sarvam’s call log before trying again.” Never retry automatically after an unconfirmed request. The test page cannot detect answered or ended calls.
+1. “DEMO” label, 14px, letter-spaced.
+2. Soft blue swirl orb (see References and Colours). It turns slowly in every state and stays still when the phone is set to reduce motion. It cannot react to the call. About 58% of the screen width, at most 240px.
+3. “Tap below. Your phone will ring. Answer to talk with your AI companion.”
+4. “Call me” button, charcoal. When unavailable: solid grey (#6B6B6B) with a white label, 5.33:1 contrast.
+5. Status line.
 
-This narrow test supersedes the in-page ringing and orb design below while testing the outbound option. Full product screens remain deferred.
+No headline, no phone icon, and no “Demo only. No alerts or location sharing.” line; the builder removed them on 2026-10-07. Nothing on this page says that no alerts are sent.
+
+Status messages:
+
+- Checking: “Checking the call setup…”
+- Ready (empty): “Ready when you are.”
+- Loading: “Asking your AI companion to call you…”
+- Requested: “Call requested. Answer when your phone rings. This doesn’t confirm the call connected.”
+- Missing configuration: “The calling connection isn’t set up yet. Your phone won’t ring until it’s connected.” If the settings disappear between opening the page and tapping, the shorter “The calling connection isn’t set up yet.” appears.
+- Unconfirmed: “We couldn’t confirm the call request. It may still ring. Check your phone and Sarvam’s call log before trying again.” Never retry automatically after an unconfirmed request.
+- Sarvam refused the call: “Couldn’t place the call. Try again.” The status code goes to the Convex logs only.
+- No private link: “Open your private test link to use this demo.”
+- Already requested in this tab: “A call was already requested in this tab. Check your phone and Sarvam’s call log before starting another test.”
+- Setup check failed: “Couldn’t check the call setup. Refresh to try again.”
+
+Button labels by state: “Call me”, “Call not ready”, “Requesting call…”, “Call requested”, “Check your phone”, “Try again”. Browser tab title: “Walking companion · Call test”. The builder kept these on 2026-10-07.
+
+The page cannot yet detect whether a call was answered or ended. The in-page ringtone and in-browser orb conversation described in older sections below are replaced by the phone call; those places are marked.
 
 ## 1. The feeling, in labels
 
-- **Soft animated orb:** Gives the AI a presence without a human face; responds while listening and speaking.
+- **Soft animated orb:** Gives the AI a presence without a human face. It turns slowly; it cannot respond to the voice, because the call happens in the phone app.
 - **Open space around the orb:** Keeps attention on the conversation rather than a dashboard.
-- **Few rounded controls:** Keeps mute, the manual alert, and “I’m safe” within reach.
+- **Few rounded controls:** Keeps the manual alert and “I’m safe” within reach. Mute and speaker are in the phone's call app.
 - **Quiet status text:** Explains connection, location sharing, and alerts without interrupting the call.
 - **Gentle motion with readable status:** Supports the calm feeling; motion is never the only way to understand what is happening.
 
@@ -24,13 +45,15 @@ This narrow test supersedes the in-page ringing and orb design below while testi
 Take: [exactly what to copy]
 Ignore: [what isn't the point]
 
-### Active-call screen inspiration
+### Orb
 
-**Orb and voice-screen layout:** ChatGPT Voice, as described in our discussion. [Image file or link still to be supplied.]
+**Orb:** The builder's active-call mockup, shared in chat on 2026-10-07. [Image not yet saved in the project.] A ChatGPT Voice screenshot was shared the same day; the builder preferred the mockup's orb.
 
-Take: A soft blue-white animated orb, generous open space, very little text, and a few floating circular controls. The conversation is the main interaction.
+Take: A soft sky-blue sphere with two deeper-blue swirls, white S-shaped streaks between them, and a soft edge. Slow, gentle motion, generous open space, very little text.
 
 Ignore: ChatGPT branding, its exact screen, and controls unrelated to this safety flow. Do not use a human avatar or imply a real person is answering.
+
+The mockup also shows a full active-call screen: “Connected to your AI companion”, the orb, “I’m here with you.”, “Location sharing is on”, Mute, Speaker, “Alert my contact”, “I’m safe” and “End call”. With a real phone call, mute and speaker belong to the phone's call app and the page cannot yet confirm the call connected, so that screen needs redesign before it is built.
 
 ## 3. Type and colour
 
@@ -45,7 +68,7 @@ Sizes (for the web app, in CSS pixels):
 
 Important call and alert messages must be **16px or larger**. Allow text to grow with the user’s accessibility settings and browser text scaling; do not clip enlarged text. These are starting sizes and can be adjusted after reviewing the screens.
 
-Colours: Dark charcoal text (**#202123**) on a white background (**#FFFFFF**). Main-action buttons use charcoal (**#202123**) with white labels (**#FFFFFF**). Errors use red (**#B91C1C**) for readable text on white, alongside a clear explanation; do not rely on colour alone or replace the call with a full-screen red alert. Keep blue for the soft blue-white orb, following the ChatGPT Voice inspiration described above. Exact orb colour values are not yet chosen; ask before implementing those choices.
+Colours: Dark charcoal text (**#202123**) on a white background (**#FFFFFF**). Main-action buttons use charcoal (**#202123**) with white labels (**#FFFFFF**). Errors use red (**#B91C1C**) for readable text on white, alongside a clear explanation; do not rely on colour alone or replace the call with a full-screen red alert. Keep blue for the orb. Orb colours, matched by eye from the builder's mockup and approved on 2026-10-07: deep blue **#5B8DEF** (swirls), sky blue **#A9CCF6** (body), pale blue **#D6E8FB** (edge), and **#F5F9FF** (white streaks). Ask before changing them. Unavailable main-action buttons use solid grey (**#6B6B6B**) with a white label (5.33:1 contrast).
 
 ## 4. Screens
 
@@ -53,6 +76,8 @@ Colours: Dark charcoal text (**#202123**) on a white background (**#FFFFFF**). M
 Empty: [words] · Loading: [words] · Error: [words] · Done: [words]
 
 ### Active safety-call screen
+
+**Needs redesign for the phone call.** This screen was designed for the in-browser call. With a real phone call, the conversation, mute and speaker are in the phone's call app, the in-page ringtone and “no Answer tap” no longer apply, and the page cannot yet tell whether the call connected, was answered or ended. The alert, SMS, safety-update and “I’m safe” rules below still apply. Redesign this screen after the decisions in PLAN.md.
 
 **For:** Staying on an AI call while walking, asking for help without changing screens, and confirming safety.
 
@@ -68,6 +93,8 @@ Empty: [words] · Loading: [words] · Error: [words] · Done: [words]
 
 #### Loading
 
+Replaced by the phone call; see Call page. Kept for reference.
+
 - Words: “Connecting your call…”
 - On tapping “Call me”, play a ringtone inside the page for **two seconds** while the connection starts. There is no “Answer” button and no incoming phone call. After the ring, automatically begin the blue-orb conversation only if connected; otherwise keep showing “Connecting…”. Do not start AI speech over the ringtone.
 - Show gentle motion and a “Cancel” control.
@@ -76,6 +103,8 @@ Empty: [words] · Loading: [words] · Error: [words] · Done: [words]
 - Show location-sharing status separately from call status.
 
 #### Connected
+
+The page cannot detect a connected phone call yet; show this only once it can be confirmed.
 
 - Status: “Connected to your AI companion.”
 - Supporting words: “I’m here with you.”
@@ -367,9 +396,9 @@ Practice never sends an alert. During a real call, the AI never announces the ph
 
 First visit: Welcome → “Try a demo call” → Demo call → “Set up my safety call” → Name and email → Email-code verification → Add trusted contact → Choose and practise code word → Home. Returning users can choose “Log in” on the account screen.
 
-Returning user: Home → “Call me” → Two-second ringtone while connecting → Automatically start the active blue-orb safety call once connected → “I’m safe” → Session-ended confirmation → Home. No “Answer” tap. If not connected after the ring, stay in Connecting until success or the 10-second limit from the tap.
+Returning user: Home → “Call me” → her phone rings → she answers and talks on the phone's call screen → “I’m safe” → Session-ended confirmation → Home. How the page shows the active session during the call needs redesign (see Active safety-call screen).
 
-During the active call, code-word alerts, missed-check-in alerts, and contact acknowledgements appear on that same screen. A failed connection after 10 seconds shows “We couldn’t connect”, with “Try again” and “Alert my contact”.
+During the active call, code-word alerts, missed-check-in alerts, and contact acknowledgements appear on the page. A call request that fails or cannot be confirmed stays visible, with “Try again” and “Alert my contact”. The 10-second connection limit applied to the in-browser call; the limit for a phone-call request is undecided (see PLAN.md).
 
 ### Welcome
 
@@ -381,6 +410,7 @@ Demo note: “Demo only. No alerts or location sharing.”
 ### Demo call
 
 Top to bottom: “DEMO CALL” label → animated orb → “Hear the AI conversation.” → “End demo”.
+This was designed for the in-browser demo. How the demo works with a real phone call is undecided (see PLAN.md).
 After the demo: “Set up my safety call” → account creation or login, then contact and code-word setup.
 
 ### Home
@@ -394,9 +424,9 @@ Top to bottom:
 3. “Safety setup ready” when setup is complete; otherwise show the specific missing item.
 4. Small links: “Trusted contacts”, “Code word”, and “Try demo”.
 
-Main action: “Call me” → two-second ringtone while connecting → automatically start the active safety-call screen once connected. No “Answer” tap; the three-action count stays unchanged.
+Main action: “Call me” → her phone rings → she answers. Answering is the second of four actions.
 
-The orb is on the demo and active-call screens; Home focuses on the “Call me” button.
+The private call page shows the orb above “Call me” (builder's choice, 2026-10-07). Whether Home keeps the headline is undecided (see PLAN.md).
 
 ```text
 ┌─────────────────────────────┐
@@ -414,8 +444,8 @@ The orb is on the demo and active-call screens; Home focuses on the “Call me�
 └─────────────────────────────┘
               │ tap “Call me”
               ▼
-    Two-second ring + connecting
-              │ connected
+     Phone rings, she answers
+              │
               ▼
        Active safety call
               │ “I’m safe”
@@ -433,13 +463,13 @@ The orb is on the demo and active-call screens; Home focuses on the “Call me�
 - **Ready:** Show “Call me”, “Safety setup ready”, and links to trusted contacts, code word, and demo.
 - **After a completed session:** “Session ended. Location sharing stopped.” Show any failed contact update separately.
 
-If microphone or location permission is missing, show the specific issue and ask for permission when she taps “Call me”. Do not label everything ready while a required permission is missing.
+If location permission is missing, show the specific issue and ask for permission when she taps “Call me”. The phone call itself needs no microphone permission in the browser. Do not label everything ready while a required permission is missing.
 
 ## 6. Principles
 
 - [a rule that holds on every screen]
 - Keep the conversation central and the number of decisions small.
-- Identify the voice as AI; do not imply a real person is on the call.
+- Identify the voice as AI; do not imply a real person is on the call. On the phone call, this depends on the Sarvam agent's greeting, which has not been checked.
 - Use text alongside animation to communicate status.
 - Never promise protection, invent location, or give unverified route advice.
 - Stopping alone does not mean danger; repeated missed check-ins and the code word have different alert meanings.

@@ -6,11 +6,11 @@ When you run a shell command, always pass workdir set to the absolute path of th
 
 ## Current authorization
 
-On 2026-10-06 the builder explicitly said “Okay build it” for a small real-phone-call test page. Implement that test only: “Call me” → Convex requests a Sarvam outbound call → her phone rings → she answers. This supersedes the browser-orb call direction for the current test. Do not build sign-in, location, alerts or other milestones yet. Keep service keys in Convex environment settings and restrict calls to the builder's configured test number. The full product and its action count need reconciliation after the real-phone test; the previous browser flow below is historical for this test. See CALL_TEST_SETUP.md for setup and limitations.
+On 2026-10-06 the builder authorized a small real-phone-call test page: “Call me” → Convex requests a Sarvam outbound call → her phone rings → she answers. It worked on 2026-10-07 on her Android phone, and she chose the real phone call for the full product. Calls stay restricted to the builder's configured test number, and service keys stay in Convex environment settings. Do not build sign-in, location, alerts or the next milestone until the builder says yes to it. See CALL_TEST_SETUP.md for setup and limitations, and “Decisions still needed” in PLAN.md.
 
 ## 1. How the product works
 
-**Interface:** Start with a voice-call page on the project's `.convex.site` link. She opens it in a phone browser, with no install, and taps “Call me”. Play a ringtone inside the page for two seconds while connecting, then start the blue-orb AI conversation automatically once connected. No “Answer” tap and no incoming phone call. If connection is not ready after the ring, show “Connecting…”; the connection timeout remains 10 seconds from the tap, including the ring. Keep the action count at three: “Call me”, code phrase if needed, and “I’m safe”. Ringtone audibility and playback on real phones are untested; do not guarantee nearby people hear it. The full product flow includes a code phrase for requesting help and “I’m safe” to close the safety session.
+**Interface:** A page on the project's `.convex.site` link. She opens it in a phone browser, with no install, and taps “Call me”. Sarvam calls her phone; she answers and talks with the AI companion on her phone's call screen. The page shows only what it can confirm, such as “Call requested”; it cannot yet tell whether the call was answered or ended. A soft blue swirl orb sits above “Call me”. The action count is four: “Call me”, answer, code phrase if needed, and “I’m safe”. The full product flow includes a code phrase for requesting help and “I’m safe” to close the safety session; how both work during a phone call is undecided (see PLAN.md).
 
 **Business logic:** During a real safety session, keep the AI conversation going and share location. Her code phrase or manual alert button triggers an emergency SMS; repeated missed check-ins trigger a check-on-her SMS. Try the next saved contact if the first does not respond. Ending only the call keeps the safety session, location sharing, and check-in monitoring active. Confirming “I’m safe” ends the session and location sharing and updates alerted contacts.
 
@@ -41,24 +41,24 @@ The contact page's “Call her” action requires her phone number. Hide that ac
 
 | Service | Decision and purpose | Secret-key location |
 | --- | --- | --- |
-| Sarvam | Preferred AI voice connection; verify browser integration and short-lived client access before committing to implementation | Convex server environment settings |
+| Sarvam | Chosen for the AI voice: real outbound phone calls through its Instant outbound API, from a number rented through Sarvam. Use the full Voice Agents API key (Settings → API Key). Calls cost per minute. | Convex server environment settings |
 | Resend | Chosen direction for delivering email login codes; Convex Auth handles sign-in | Convex server environment settings |
 | Twilio | Candidate for automatic SMS, not a final selection; verify eligibility and Indian SMS access for an individual builder before payment or integration | Convex server environment settings |
 | GitHub | Stores project code | Development tools; no GitHub secret in the client |
 
 Permanent service keys must never be embedded in the client or committed to GitHub. If connecting voice requires an additional backend or outside service, explain the concrete requirement and ask before adding it. Do not purchase services without the builder's approval.
 
-### First milestone: browser before an installed app
+### Browser before an installed app
 
-Build the voice-call page on `.convex.site` first, once implementation is authorized. The builder's updated direction is to skip an installed app unless the browser cannot do the job; this supersedes the earlier Android/iPhone app-first proposal.
+The page runs on `.convex.site`. The builder's direction is to skip an installed app unless the browser cannot do the job; this supersedes the earlier Android/iPhone app-first proposal. The voice is now a normal phone call, so the riskiest browser part is location.
 
-Test on both iPhone and Android phones:
+Test on both iPhone and Android phones, in the safety-call milestone:
 
-1. Open the page and start a voice conversation with session location updates.
+1. Open the page, start a safety call with session location updates, and answer the call.
 2. In a safe setting, lock the screen mid-call while walking.
-3. Check that two-way voice continues and that newly recorded location updates reach the backend, rather than merely showing the last position.
-4. If voice and location keep working, continue with the web approach for this milestone.
-5. If either stops, report the device and observed failure. That is the reason to assess an Android-only APK (an installable Android app) next; do not silently change platforms.
+3. Check that the call continues and that newly recorded location updates reach the backend, rather than merely showing the last position.
+4. If both keep working, continue with the web approach.
+5. If location stops, report the device and observed failure. That is the reason to assess an Android-only APK (an installable Android app) next; do not silently change platforms.
 
 This test has not been run. Passing it does not prove SMS alerts, check-in handling, or the entire safety flow works; those need their own tests. Never describe the product as reliable or complete based only on code inspection.
 
@@ -66,7 +66,7 @@ This test has not been run. Passing it does not prove SMS alerts, check-in handl
 
 - Codex writes code; GitHub stores it; Convex provides database, backend, Convex Auth, and static website hosting.
 - Read the installed `.agents/skills/convex-dev-static-hosting/SKILL.md` before hosting work.
-- Deploying the website means `npm run deploy`; pushing to GitHub does not deploy it.
+- Deploying the website means `npm run deploy`; pushing to GitHub does not deploy it. In a non-interactive terminal, `npm run deploy` stops at Convex's confirmation prompt; run `npx convex deploy -y`, then `npx @convex-dev/static-hosting deploy --skip-convex`.
 - Use applicable Build Sprint skills installed in this project.
 - Never use another host, database, or authentication service without asking the builder first.
 

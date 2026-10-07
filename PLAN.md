@@ -1,19 +1,18 @@
 # PLAN.md
 
-The landing page and working voice demo are one end-to-end milestone, riskiest part first. Then the remaining milestones from PRODUCT.md, in their simplest form. The earlier one-hour target applied to the landing page alone; it is not a confirmed estimate for the complete demo.
+Riskiest part first, then the remaining milestones from PRODUCT.md, in their simplest form.
 
-Status: On 2026-10-06 the builder authorized a smaller first test before the full demo: a private “Call me” page that requests a real Sarvam outbound call to her configured test number. It replaces browser audio for this test. Page and backend implementation are authorized; the calling connection and a private replacement key are still required before a real call can be verified. No milestone is confirmed complete.
+Status (2026-10-07): The builder chose a real phone call for the product. The private phone-call test works: tapping “Call me” made Sarvam call the builder's Android phone, and she talked with the agent. iPhone is untested. Make the decisions below before the milestones they affect. See CALL_TEST_SETUP.md for the test's setup.
 
-Current task: Open the private phone-call test page → tap “Call me” → phone rings → answer → hear the existing Sarvam agent. No signup, location or alerts. First confirm this works before expanding milestone 1 below. See CALL_TEST_SETUP.md. Earlier browser-orb details below are deferred while this test is evaluated.
-
-1. I can open the landing page on my phone at the project's `.convex.site` link, understand what the safety call does, and tap “Try a demo call”. After microphone permission if needed, I hear a two-second ringtone while connecting, then automatically enter the blue-orb AI conversation once connected, without an “Answer” tap. I can speak, hear live AI replies, end the demo, and return to the landing page. No signup, alerts, or location sharing. Sarvam is the preferred voice service; verify its browser connection and safe client access. If connection is not ready after the ring, show “Connecting…”; show the connection error after 10 seconds from the start of the connection attempt. Test the complete demo, ringtone playback, two-way audio, and ending the demo on actual phones. Let users try it to judge whether the voice feels natural and reassuring; do not treat a static page or prerecorded monologue as completion. ← next
-2. I can create an account using email-code verification, save one trusted contact and a code word, practise the code word without sending an alert, and add more contacts later.
-3. I can start a safety call, keep talking while I walk, and share my location for that session. Test two-way voice and newly recorded location updates with the screen locked on iPhone and Android, in a safe setting. If either stops, report the failure and assess an Android-only APK with the builder before continuing on that platform.
-4. I can say my code word and have my trusted contact receive an emergency SMS with my latest location, without the AI announcing it aloud. Verify the SMS provider and account eligibility before integration or payment.
-5. I can miss repeated check-ins and have my contact receive a check-on-me alert; stopping alone does not send an emergency alert.
-6. I can have the app try my next saved contact if the first does not respond, and see whether a contact has acknowledged the alert through their private alert link, without contact signup.
-7. I can confirm “I’m safe”, end the call and location sharing, and have alerted contacts receive an update. Ending only the call must keep the safety session active, with “Call me” and “I’m safe” visible.
-8. I can close it, reopen it, and my data is still there.
+1. ✓ I can open the private page on my phone, tap “Call me”, my phone rings, I answer, and I talk with the AI companion. Done 2026-10-07 for the builder's own number only (Android). Not covered yet: iPhone, other people's numbers, and detecting answered or ended calls.
+2. I can try a clearly labelled demo before signing up, without sending alerts or sharing my location, and judge whether the voice feels natural and reassuring. Needs the demo decision below first. ← next
+3. I can create an account using email-code verification, save one trusted contact and a code word, practise the code word without sending an alert, and add more contacts later.
+4. I can start a safety call, keep talking on the phone while I walk, and share my location for that session from the page. Test that newly recorded location updates keep reaching the backend with the screen locked during a phone call, on iPhone and Android, in a safe setting. If location stops, report the failure and assess an Android-only APK with the builder before continuing on that platform.
+5. I can say my code word and have my trusted contact receive an emergency SMS with my latest location, without the AI announcing it aloud. Verify the SMS provider and account eligibility before integration or payment.
+6. I can miss repeated check-ins and have my contact receive a check-on-me alert; stopping alone does not send an emergency alert.
+7. I can have the app try my next saved contact if the first does not respond, and see whether a contact has acknowledged the alert through their private alert link, without contact signup.
+8. I can confirm “I’m safe”, end the call and location sharing, and have alerted contacts receive an update. Ending only the call must keep the safety session active, with “Call me” and “I’m safe” visible.
+9. I can close it, reopen it, and my data is still there.
 
 Work on one milestone at a time, end to end. Before writing code, explain the intended outcome and plan, then wait for the builder's yes. After the builder confirms the milestone works, commit, push, and add one line to PROGRESS.md.
 
@@ -31,11 +30,18 @@ Run the thirty-minute, no-code voice check from PRODUCT.md while building. It ha
 - A trusted person joining the call.
 - City-based personalisation.
 - Sending a test SMS when adding a trusted contact.
-- An installed app, unless the browser voice/location test shows it is needed. Android-only APK is the agreed next option to assess after a failed test.
+- An installed app, unless the browser location test shows it is needed. Android-only APK is the agreed next option to assess after a failed test.
+- The in-browser call: a two-second ringtone inside the page, then a blue-orb AI conversation in the browser with no “Answer” tap. Replaced by the real phone call on 2026-10-07.
 
 ## Decisions still needed before the relevant work
 
-- Sarvam browser connection and safe client access.
+- **“I’m safe”:** she taps it on the page, says it to the AI, or both.
+- **Demo before sign-up:** a real call needs her phone number before sign-up and costs per minute (Sarvam's pricing page lists ₹3.50 per minute). Calling cannot be open to the public until sign-in and call limits exist. Decide how the demo works.
+- **Code word and check-ins during a phone call:** the app does not hear the call, so Sarvam's agent would have to tell Convex when she says the code word or misses check-ins. Check what Sarvam supports before relying on it. This also decides how code-word practice works.
+- **Call status:** the page cannot tell whether a call was answered or ended. Sarvam's outbound request accepts a `webhook_config`; check what it reports before relying on it. Also decide how long to wait on a call request before showing an error (the 10-second limit was for the in-browser call).
+- **Location during a phone call:** the page must stay open in the browser during the call. Untested with the screen locked.
+- **Demo label:** PRODUCT.md asks for “Demo only. No contacts are alerted or location shared.” The builder removed the demo line from the private call page on 2026-10-07. Decide what the public demo says.
+- **Home headline:** whether Home keeps “A voice with you on your walk.” The builder removed it from the private call page.
 - SMS provider selection, individual-account eligibility, and cost approval. Twilio is a candidate, not connected or approved for spending.
 - Check-in intervals, how many missed replies trigger an alert, and how long to wait before trying the next saved contact.
 - Retention periods for location and alert records.

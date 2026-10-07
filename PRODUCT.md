@@ -1,6 +1,6 @@
 # Product flow
 
-Current test decision (2026-10-06): Build a private page where “Call me” requests a real Sarvam outbound phone call. Her phone rings, she answers, and speaks with the existing agent. No location, alerts or signup in this test. This supersedes browser audio for the current test; the full flow below is the earlier design and needs reconciliation after the test. Answering adds an action: the proposed full-product count would be four rather than three. No real call from the page has been verified yet.
+Decision (2026-10-07): The product uses a real phone call. She taps “Call me”, Sarvam calls her phone, she answers, and she talks with the AI companion on her phone's call screen. This replaces the earlier in-page ringtone and in-browser orb conversation. Answering adds an action, so the count is four. The private phone-call test worked on 2026-10-07 (the builder's Android phone, her own number only). The questions this raises are listed under “Decisions still needed” in PLAN.md.
 
 ## 1. The job
 
@@ -30,11 +30,11 @@ Habit: Sharing location on WhatsApp before heading out, in one click, with no ne
 
 ### With my product
 
-1. **“Call me.”** She taps once. The page plays a ringtone for two seconds while connecting, then starts the blue-orb AI conversation automatically once connected. There is no “Answer” tap or incoming phone call. If connection is not ready after two seconds, show “Connecting…” until it succeeds or reaches the 10-second connection limit, measured from the initial tap.
-2. **Stay connected.** The conversation continues while she decides where to go. Location sharing runs for this safety session.
-3. **Ask for help without opening another screen.** Her code word sends an emergency alert and her latest location to chosen contacts. The conversation continues.
-4. **Handle silence.** An unexpected stop prompts a check-in. Repeated missed replies trigger a “please check on her” alert, clearly sent by the app. Contacts can acknowledge that they’re responding.
-5. **“I’m home” or “I’m safe.”** She confirms safety. The session and location sharing end, and alerted contacts receive an update.
+1. **“Call me.”** She taps once. Her phone rings with a call from the AI companion's number, and she answers. The conversation happens on her phone's call screen. The page shows only what it can confirm, such as “Call requested”; it cannot yet tell whether the call was answered or ended.
+2. **Stay connected.** The conversation continues while she decides where to go. Location sharing runs for this safety session from the page, which stays open in her browser during the call. Whether location keeps updating with the screen locked during a phone call is untested.
+3. **Ask for help without opening another screen.** Her code word sends an emergency alert and her latest location to chosen contacts. The conversation continues. How the code word reaches the app during a phone call is undecided (see PLAN.md).
+4. **Handle silence.** An unexpected stop prompts a check-in. Repeated missed replies trigger a “please check on her” alert, clearly sent by the app. Contacts can acknowledge that they’re responding. How the app learns about missed replies during a phone call is undecided (see PLAN.md).
+5. **“I’m home” or “I’m safe.”** She confirms safety. The session and location sharing end, and alerted contacts receive an update. Whether she taps this on the page, says it to the AI, or both is undecided (see PLAN.md).
 
 ### What must not happen
 
@@ -46,7 +46,7 @@ Habit: Sharing location on WhatsApp before heading out, in one click, with no ne
 
 ### Things it takes to get the job done
 
-Today: **5** · With my product: **3** (tap “Call me”, code word if needed, confirm safe).
+Today: **5** · With my product: **4** (tap “Call me”, answer the call, code word if needed, confirm safe).
 
 ## 4. Onboarding
 
@@ -54,6 +54,7 @@ Today: **5** · With my product: **3** (tap “Call me”, code word if needed, 
 - **Smallest commitment:** One trusted contact and her code word.
 - **The worry it removes:** “The voice sounds fake.”
 - **The steps from opening the link to first value:** Open the link → tap “Try a demo call” → hear the natural AI voice. This is first value. Then choose “Set up my safety call” → create an account → add one trusted contact → choose and practise a code word.
+- **The demo with a real phone call:** A real call needs her phone number before sign-up and costs per minute, and calling cannot be open to the public until sign-in and call limits exist. How the demo works is undecided (see PLAN.md).
 - **Login:** After the demo, when she chooses “Set up my safety call.” New users create an account with their name and email; returning users log in.
 - **What we don’t ask on day one:** Anything beyond name, email, one trusted contact, and a code word; permissions before they’re needed.
 - **What we ask later, and when:** City (optional), after her demo call.
@@ -86,7 +87,7 @@ Clearly label the demo: **“Demo only. No contacts are alerted or location shar
 
 ## 7. Milestones
 
-1. I can tap “Call me”, hear a two-second ringtone, and automatically start a blue-orb AI conversation once connected, without an “Answer” tap.
+1. I can tap “Call me”, my phone rings, I answer, and I talk with the AI companion. (Done 2026-10-07 on the private test page, for the builder's own number.)
 2. I can try a clearly labelled demo before signing up, without sending alerts or sharing my location.
 3. I can create an account, save one trusted contact and a code word, and add more contacts later.
 4. I can start a safety call, keep talking while I walk, and share my location for that session.

@@ -1,4 +1,4 @@
-The current test, in one line: Tap “Call me” on a private page → Sarvam calls her phone → she answers and talks to the existing AI agent. The builder authorized this narrow outbound-call test on 2026-10-06; earlier browser-orb details below are deferred for this test. It has no location sharing or alerts yet.
+Decision, 2026-10-07: the product uses a real phone call. Tap “Call me” → Sarvam calls her phone → she answers and talks to the AI companion. The private test of this worked on 2026-10-07. It has no location sharing or alerts yet.
 
 Why me: I'm the user. After work night is often the only time I have to run. Most nights I don't go, because I'm scared to go alone. When I have gone and felt unsafe, I called my parents, but they were in a different city and couldn't have done anything. Every safety app I've seen only guarantees that someone knows if something bad happens. None of them tries to stop it. I've also been a PM for five and a half years and took a consumer app to 100K+ downloads, so I know how to get this in front of people.
 
@@ -8,7 +8,7 @@ The job: When I’m walking alone late at night or early in the morning and noti
 
 The one goal they hire it for: Life. "I want to go out alone at night and not give things up because of fear."
 
-Action count: Five actions today: try calling someone; if they don’t answer, try someone else or pretend to be on a call; message a trusted person about what is happening; look for nearby help or cut the walk short; confirm arrival safely. Three with my product: tap “Call me”, say the code word if needed, and confirm “I’m safe”.
+Action count: Five actions today: try calling someone; if they don’t answer, try someone else or pretend to be on a call; message a trusted person about what is happening; look for nearby help or cut the walk short; confirm arrival safely. Four with my product: tap “Call me”, answer the call, say the code word if needed, and confirm “I’m safe”.
 
 The sin it rides: Wrath for the launch, because anger at unsafe streets is widely shared. Pride later, with "I did my night run."
 
@@ -26,16 +26,16 @@ PRODUCT
 
 Call format:
 
-- Original idea (future option, not v1): Tap "Call me" → her phone rings → she answers an incoming phone call.
-- Current v1: Tap "Call me" → a ringtone plays inside the page for two seconds while connecting → the blue-orb AI conversation starts automatically once connected. No “Answer” tap and no incoming phone call. If it is not connected after the ring, show “Connecting…”; after 10 seconds from the tap, show the connection error. Ringtone playback and audibility still need phone testing.
+- Current v1 (chosen 2026-10-07, the original idea): Tap “Call me” → her phone rings → she answers an incoming phone call from the AI companion.
+- Earlier v1 direction, now parked: a ringtone played inside the page for two seconds, then a blue-orb AI conversation started in the browser with no “Answer” tap.
 
-Start with a phone-browser page on the project's .convex.site link. Voice and location with the screen locked still need testing; do not assume they work.
+Start with a phone-browser page on the project's .convex.site link. The voice is a normal phone call; location with the screen locked during the call still needs testing, so do not assume it works.
 
-Onboarding: She tries the labelled demo voice conversation inside the page before signing up. The demo does not share location or send alerts. After the demo, she creates an account, adds a trusted contact, and chooses and practises a code word. Practice sends no alerts. See PRODUCT.md and DESIGN.md for the approved setup flow.
+Onboarding: She tries a labelled demo before signing up. How the demo works with a real phone call is undecided. The demo does not share location or send alerts. After the demo, she creates an account, adds a trusted contact, and chooses and practises a code word. Practice sends no alerts. See PRODUCT.md and DESIGN.md for the approved setup flow.
 
 The core loop:
 
-I'm on an empty stretch and I can feel someone behind me. I tap “Call me” to start my safety session. A ringtone plays inside the page for two seconds while connecting. After the ring, the blue-orb AI conversation starts automatically once connected, without another tap. If it is not ready, the screen shows “Connecting…” rather than pretending the call is connected. The AI must not invent my location or give unverified route advice.
+I'm on an empty stretch and I can feel someone behind me. I tap “Call me” to start my safety session. My phone rings and I answer; the AI companion talks with me on the phone. The page never pretends the call is connected. The AI must not invent my location or give unverified route advice.
 
 He's still there. I say my code word or tap “Alert my contact” if I can't speak. My trusted contacts receive an emergency SMS with my latest available location. If automatic sending fails, I can open a prepared SMS and send it myself; opening SMS is not proof it was sent.
 
