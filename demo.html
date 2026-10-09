@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Walking companion · Demo call</title>
+    <script type="module" src="/src/demo.js"></script>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">DEMO</p>
+      <svg class="orb" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="orb-body" cx="45%" cy="42%" r="62%">
+            <stop offset="0" stop-color="#A9CCF6" />
+            <stop offset="1" stop-color="#D6E8FB" />
+          </radialGradient>
+          <radialGradient id="orb-fade">
+            <stop offset=".93" stop-color="#fff" />
+            <stop offset="1" stop-color="#fff" stop-opacity="0" />
+          </radialGradient>
+          <mask id="orb-edge"><circle cx="100" cy="100" r="100" fill="url(#orb-fade)" /></mask>
+          <filter id="orb-wide" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16" /></filter>
+          <filter id="orb-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9" /></filter>
+        </defs>
+        <g mask="url(#orb-edge)">
+          <circle cx="100" cy="100" r="100" fill="url(#orb-body)" />
+          <g class="orb-swirl">
+            <g fill="#5B8DEF" filter="url(#orb-wide)">
+              <ellipse cx="114" cy="86" rx="46" ry="36" opacity=".9" />
+              <ellipse cx="60" cy="124" rx="40" ry="34" opacity=".95" />
+            </g>
+            <g fill="none" stroke="#F5F9FF" stroke-linecap="round" filter="url(#orb-soft)" opacity=".75">
+              <path d="M46 52 C 84 22, 150 34, 160 80" stroke-width="22" />
+              <path d="M98 108 C 80 140, 104 172, 156 150" stroke-width="24" />
+            </g>
+          </g>
+        </g>
+      </svg>
+      <p class="intro">Tap below. Your phone will ring.<br />Answer to talk with your AI companion.</p>
+      <form id="demo" class="demo-form" novalidate>
+        <label class="field-label" for="phone">Your mobile number</label>
+        <div class="phone-field">
+          <span class="phone-prefix">+91</span>
+          <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="16" required />
+        </div>
+        <button id="call" type="submit" disabled>Call me</button>
+      </form>
+      <p id="status" role="status" aria-live="polite">Checking the call setup…</p>
+    </main>
+  </body>
+</html>

@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as demo from "../demo.js";
 import type * as http from "../http.js";
 import type * as lib_call from "../lib/call.js";
+import type * as lib_demo from "../lib/demo.js";
 
 import type {
   ApiFromModules,
@@ -18,8 +20,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  demo: typeof demo;
   http: typeof http;
   "lib/call": typeof lib_call;
+  "lib/demo": typeof lib_demo;
 }>;
 
 /**

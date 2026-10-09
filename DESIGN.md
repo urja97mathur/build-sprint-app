@@ -22,7 +22,7 @@ Status messages:
 - Requested: “Call requested. Answer when your phone rings. This doesn’t confirm the call connected.”
 - Missing configuration: “The calling connection isn’t set up yet. Your phone won’t ring until it’s connected.” If the settings disappear between opening the page and tapping, the shorter “The calling connection isn’t set up yet.” appears.
 - Unconfirmed: “We couldn’t confirm the call request. It may still ring. Check your phone and Sarvam’s call log before trying again.” Never retry automatically after an unconfirmed request.
-- Sarvam refused the call: “Couldn’t place the call. Try again.” The status code goes to the Convex logs only.
+- Sarvam refused the call: “Couldn’t place the call. Try again.” The status code goes to the Convex logs only. On the live page this currently shows as the Unconfirmed message instead, because the server's 502 reply is replaced by the network in front of Convex (see CALL_TEST_SETUP.md).
 - No private link: “Open your private test link to use this demo.”
 - Already requested in this tab: “A call was already requested in this tab. Check your phone and Sarvam’s call log before starting another test.”
 - Setup check failed: “Couldn’t check the call setup. Refresh to try again.”
@@ -30,6 +30,19 @@ Status messages:
 Button labels by state: “Call me”, “Call not ready”, “Requesting call…”, “Call requested”, “Check your phone”, “Try again”. Browser tab title: “Walking companion · Call test”. The builder kept these on 2026-10-07.
 
 The page cannot yet detect whether a call was answered or ended. The in-page ringtone and in-browser orb conversation described in older sections below are replaced by the phone call; those places are marked.
+
+## Demo page — built 2026-10-07
+
+Public page at `/demo.html` for milestone 2, in the same style as the call page. Top to bottom: “DEMO” label → orb → “Tap below. Your phone will ring. Answer to talk with your AI companion.” → “Your mobile number” field with a fixed “+91” in front (pill-shaped, grey #6B6B6B outline) → “Call me” → status line. “Call me” is available only once the number looks like an Indian mobile number.
+
+Messages are the same as the call page for checking, ready, loading, requested, missing configuration and refused, plus:
+
+- Invalid number: “Check this phone number”
+- Number already used: “This number already had its demo call.”
+- Daily limit reached: “Demo calls are full today. Try tomorrow.”
+- Unconfirmed: “We couldn’t confirm the call request. It may still ring. Check your phone before trying again.” (The public can't see Sarvam's call log.)
+
+Browser tab title: “Walking companion · Demo call”. The field label, “+91” prefix, field shape, tab title and unconfirmed wording were chosen while building; the builder has not yet confirmed them.
 
 ## 1. The feeling, in labels
 

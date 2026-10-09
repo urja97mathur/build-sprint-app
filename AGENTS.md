@@ -30,6 +30,7 @@ Use Convex for all database tables and backend logic. The builder approved these
 | Check-ins | Requests, response deadlines, and answered or missed status |
 | Alerts | Reason, trigger, location snapshot, and whether she later confirmed safety |
 | Alert deliveries | Each contact's message, sending and delivery status, acknowledgement, and protected alert-page access |
+| Demo calls | A keyed fingerprint of each number that had a demo call (never the number itself), the India date, and the request's outcome. Approved 2026-10-07 for milestone 2. |
 
 Convex Auth manages sign-in records. Do not add a separate database or authentication service. Do not add an AI-answer editing table or record audio or video.
 

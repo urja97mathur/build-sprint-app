@@ -54,7 +54,7 @@ Today: **5** · With my product: **4** (tap “Call me”, answer the call, code
 - **Smallest commitment:** One trusted contact and her code word.
 - **The worry it removes:** “The voice sounds fake.”
 - **The steps from opening the link to first value:** Open the link → tap “Try a demo call” → hear the natural AI voice. This is first value. Then choose “Set up my safety call” → create an account → add one trusted contact → choose and practise a code word.
-- **The demo with a real phone call:** A real call needs her phone number before sign-up and costs per minute, and calling cannot be open to the public until sign-in and call limits exist. How the demo works is undecided (see PLAN.md).
+- **The demo with a real phone call:** Decided 2026-10-09 and working. She enters her mobile number on the demo page and gets one real call from the demo agent, Simran: one per number, ever; at most 20 a day across everyone; under a minute. Simran says it's a demo and that she's an AI, checks the sound, asks one question about the walk, says no one is alerted and no location is shared, and asks whether it felt natural. See CALL_TEST_SETUP.md.
 - **Login:** After the demo, when she chooses “Set up my safety call.” New users create an account with their name and email; returning users log in.
 - **What we don’t ask on day one:** Anything beyond name, email, one trusted contact, and a code word; permissions before they’re needed.
 - **What we ask later, and when:** City (optional), after her demo call.
@@ -88,7 +88,7 @@ Clearly label the demo: **“Demo only. No contacts are alerted or location shar
 ## 7. Milestones
 
 1. I can tap “Call me”, my phone rings, I answer, and I talk with the AI companion. (Done 2026-10-07 on the private test page, for the builder's own number.)
-2. I can try a clearly labelled demo before signing up, without sending alerts or sharing my location.
+2. I can try a clearly labelled demo before signing up, without sending alerts or sharing my location. (Done 2026-10-09: one real demo call per number, under a minute.)
 3. I can create an account, save one trusted contact and a code word, and add more contacts later.
 4. I can start a safety call, keep talking while I walk, and share my location for that session.
 5. I can say my code word and have my trusted contact receive an emergency alert with my latest location, without the AI announcing it aloud.
