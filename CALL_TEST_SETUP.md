@@ -21,7 +21,7 @@ Official contract: https://docs.sarvam.ai/conversations/api/instant-outbound/cre
 
 `npm run dev` opens the local page. `npm test` checks server rejection, fixed destination, confirmation and uncertain outcomes using fake Sarvam responses. `npm run build` builds the static assets. `npm run deploy` deploys the Convex backend and uploads the page to the production `.convex.site` address. In a non-interactive terminal it stops at Convex's confirmation prompt; run `npx convex deploy -y`, then `npx @convex-dev/static-hosting deploy --skip-convex`.
 
-Open the hosted address with `#access=YOUR_PRIVATE_TEST_ACCESS_TOKEN`. The page keeps access in tab session storage and removes it from the visible address. It never stores or requests the Sarvam key.
+Open `/call-test.html` on the hosted address with `#access=YOUR_PRIVATE_TEST_ACCESS_TOKEN`. (Until 2026-10-10 it was the main address; the main address now opens Welcome.) The page keeps access in tab session storage and removes it from the visible address. It never stores or requests the Sarvam key.
 
 Until the required server settings exist, the button stays unavailable and the page explains that calling is not ready. After setup, tap once, answer the real call, and verify the conversation. Finish the call on the phone. This page does not detect answered or ended calls yet.
 
@@ -45,3 +45,15 @@ Demo settings, on the Production deployment:
 - It also uses `SARVAM_API_KEY`, `SARVAM_ORG_ID` and `SARVAM_WORKSPACE_ID`.
 
 Sarvam demo agent: duplicate the agent, and in its Settings tab set “Max call length” to 1 minute. Setting the same opening as its greeting is a fallback in case Sarvam ignores the one sent with the call. Whether the minute counts from ringing or from answering is untested.
+
+## Sign-up and setup (milestone 3)
+
+Pages: the main address (`/`) is Welcome, sign-in, setup and Home; `/app.html` forwards there. The demo page links to sign-up with “Set up my safety call”. Sign-in uses Convex Auth: a six-digit code sent to her email through Resend, valid for 15 minutes, with at most 10 wrong codes an hour per email. Her account, trusted contacts (in order) and code phrase are stored in Convex (`convex/setup.js`). The code phrase is saved once, after a successful practice, and can't be changed. Practice uses the browser's own speech recognition; nothing is sent to anyone.
+
+Routing (since 2026-10-10): the static-hosting component runs in “app-owned root routing” mode. `convex/http.js` registers `/api/call-setup`, `/api/call`, `/api/demo-call` and Convex Auth's `/.well-known/…` keys, then hands every other path to the static site. The `/api/…` addresses didn't change. Convex Auth needs its keys at the site root; under `/api` its tokens were refused.
+
+Settings on Production:
+
+- `JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`: Convex Auth's signing keys, generated and set on 2026-10-10. Development has its own. Never paste them anywhere.
+- `AUTH_RESEND_KEY`: the Resend API key (Resend → API Keys, “Sending access”). Without a verified domain, Resend only delivers to the Resend account's own email address.
+- `AUTH_EMAIL_FROM`: optional sender, for example `Walking companion <codes@your-domain>` once a domain is verified. Defaults to Resend's test sender.

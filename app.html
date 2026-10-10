@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
     <title>Walking companion</title>
-    <script type="module" src="/src/app/main.jsx"></script>
+    <!-- The setup pages moved to the main address on 2026-10-10. Old /app.html links forward there, keeping the #part. -->
+    <script>location.replace('/' + location.hash);</script>
   </head>
   <body>
-    <div id="root"></div>
+    <p><a href="/">Open Walking companion</a></p>
   </body>
 </html>

@@ -1,10 +1,11 @@
-import './style.css';
+import './ui.css';
 
 // Public demo before sign-up. All limits are checked in Convex; this page only reports what Convex says.
 const form = document.querySelector('#demo');
 const input = document.querySelector('#phone');
 const button = document.querySelector('#call');
 const status = document.querySelector('#status');
+const next = document.querySelector('#next'); // "Would this feel natural on your walk?", once she's had her demo
 // Only the public Convex address may enter the bundle. All Sarvam settings stay server-side.
 const origin = import.meta.env.VITE_CONVEX_URL
   ? import.meta.env.VITE_CONVEX_URL.replace(/\.convex\.cloud$/, '.convex.site')
@@ -62,6 +63,7 @@ form.addEventListener('submit', async event => {
       done = true;
       button.textContent = 'Call requested';
       show('Call requested. Answer when your phone rings. This doesn’t confirm the call connected.');
+      next.hidden = false;
     } else if (result.uncertain) {
       done = true;
       button.textContent = 'Check your phone';
@@ -69,6 +71,7 @@ form.addEventListener('submit', async event => {
     } else {
       button.textContent = response.status === 424 ? 'Try again' : 'Call me';
       show(result.message, true);
+      if (response.status === 409) next.hidden = false; // this number already had its demo
     }
   } catch {
     // The request may have reached Sarvam before the connection failed.

@@ -4,7 +4,7 @@ Read this before building or changing any screen. If a choice isn't covered here
 
 ## Call page (real phone call) — updated 2026-10-07
 
-The product uses a real phone call: she taps “Call me”, her phone rings, she answers, and the conversation happens on her phone's call screen, not on the page. The private call page is the only screen built so far. White screen. Top to bottom:
+The product uses a real phone call: she taps “Call me”, her phone rings, she answers, and the conversation happens on her phone's call screen, not on the page. The private call page is at `/call-test.html` (moved from the main address on 2026-10-10). White screen. Top to bottom:
 
 1. “DEMO” label, 14px, letter-spaced.
 2. Soft blue swirl orb (see References and Colours). It turns slowly in every state and stays still when the phone is set to reduce motion. It cannot react to the call. About 58% of the screen width, at most 240px.
@@ -31,9 +31,28 @@ Button labels by state: “Call me”, “Call not ready”, “Requesting call�
 
 The page cannot yet detect whether a call was answered or ended. The in-page ringtone and in-browser orb conversation described in older sections below are replaced by the phone call; those places are marked.
 
+## Public pages — redesigned 2026-10-10 from the builder's screens
+
+Reference: `design/screens-2026-10-05.png` (see References). The builder approved it as the design for all public pages on 2026-10-10. The private call page above keeps its own look. Where this section and older sections below differ in words or layout, this section wins; their states, errors and timeouts still apply.
+
+**Style.** White page, system font, charcoal text. Small `<` chevron at the top left for Back. Headlines 28px bold: centred on Welcome, Account, Log in, Verify and Home; left-aligned on the two setup steps, under “Step 1 of 2” / “Step 2 of 2” (14px grey). Supporting text grey (#5C5C5C). Fields: rectangles with 8px corners, a grey border (#949494, darker than the image so it stays visible) and example text inside. Main buttons: charcoal rounded rectangles (12px corners); a second choice is white with a grey outline. Links are underlined. The approved swirl orb stays.
+
+**Pages, in order** (the main address, `/`, unless noted; `/app.html` forwards there):
+
+1. **Welcome**, first for anyone signed out: “A voice with you on your walk.” → “Hear how your AI safety call would sound.” → “Try a demo call” → “Demo only. No alerts or location sharing.” → “Already have an account?” / “Log in” (added; not in the image). The walking illustration goes between the words and the button once the builder saves it as its own image.
+2. **Demo** (`/demo.html`): `<` → “DEMO CALL” → orb → “Hear the AI conversation.” → “Your mobile number” (+91) → “Call me” → status → “Set up my safety call” link. The image's “End demo” is replaced by the phone-number field and “Call me”, because the demo is a real phone call. After the call is requested, or if the number already had its demo, “Would this feel natural on your walk?” appears above the link.
+3. **Account**: `<` → “Set up your safety call” → “Your name” (e.g. Taylor Smith) → “Your email” (you@example.com) → “Continue” → divider → “Already have an account?” / “Log in”. **Log in** follows the same layout: “Welcome back” → “Log in to your safety call.” → “Your email” → “Send code” → “New here?” / “Create account”.
+4. **Verify**: `<` → “Check your email” → “Enter the code sent to your email at [email].” → six code boxes → “Verify” → “Resend code” → “Change email”.
+5. **Setup, step 1**: “Step 1 of 2” → “Add trusted contact” → “They’ll be alerted if you need help.” → “Choose from contacts” / “Enter manually”. Typing shows “Their name” and “Mobile number” (with “Include the country code, like +91.”) → “Save and continue”. Saved: “Contact saved. Let them know you’ve chosen them.” → “Continue”.
+6. **Setup, step 2**: “Step 2 of 2” → “Choose your code phrase” → “Say this to your AI companion if you need help.” → field (e.g. sunflower) → “You can’t change it later.” → “Practise phrase” (outlined); after a successful practice, “Save and finish” → status → “Practice sends no alerts.”
+7. **Home**: “A voice with you on your walk.” → green check + “Safety setup ready” (or the missing step with “Finish setup”) → rows with icons and `>`: “Trusted contacts”, “Code word” (shows “Saved”, never the phrase, and doesn't open), “Try demo” → “Log out” link (added). “Call me” arrives in milestone 4, without a phone icon (removed 2026-10-07).
+8. **Not drawn, same style:** “Let’s finish setting up your account” (name), and **Trusted contacts** (list of names and numbers → “Add another contact”).
+
+The image's **active call** screen is not built: it's milestone 4, and Mute/Speaker belong to the phone's own call screen.
+
 ## Demo page — built 2026-10-07
 
-Public page at `/demo.html` for milestone 2, in the same style as the call page. Top to bottom: “DEMO” label → orb → “Tap below. Your phone will ring. Answer to talk with your AI companion.” → “Your mobile number” field with a fixed “+91” in front (pill-shaped, grey #6B6B6B outline) → “Call me” → status line. “Call me” is available only once the number looks like an Indian mobile number.
+Public page at `/demo.html` for milestone 2. Its layout is now in “Public pages” above. “Call me” is available only once the number looks like an Indian mobile number.
 
 Messages are the same as the call page for checking, ready, loading, requested, missing configuration and refused, plus:
 
@@ -58,9 +77,17 @@ Browser tab title: “Walking companion · Demo call”. The field label, “+91
 Take: [exactly what to copy]
 Ignore: [what isn't the point]
 
+### Screens
+
+**Screens:** `design/screens-2026-10-05.png`, the builder's generated screens (Welcome, Demo, Account, Verify, Safety setup, Home, Active call), approved as the design for the public pages on 2026-10-10.
+
+Take: layout, words, the `<` back chevron, rectangular fields with example text, charcoal rounded-rectangle buttons with outlined second choices, six code boxes, “Step 1 of 2”, and Home's icon rows with a green check.
+
+Ignore: anything that assumes the old in-browser call (the demo's “End demo”, Mute/Speaker), the phone icon on “Call me”, the image's own orb (the swirl orb is approved), and the fake phone status bar.
+
 ### Orb
 
-**Orb:** The builder's active-call mockup, shared in chat on 2026-10-07. [Image not yet saved in the project.] A ChatGPT Voice screenshot was shared the same day; the builder preferred the mockup's orb.
+**Orb:** The builder's active-call mockup, shared in chat on 2026-10-07. An active-call mockup with the same orb is saved as `design/active-call-2026-10-05.png`. A ChatGPT Voice screenshot was shared the same day; the builder preferred the mockup's orb.
 
 Take: A soft sky-blue sphere with two deeper-blue swirls, white S-shaped streaks between them, and a soft edge. Slow, gentle motion, generous open space, very little text.
 
@@ -81,7 +108,7 @@ Sizes (for the web app, in CSS pixels):
 
 Important call and alert messages must be **16px or larger**. Allow text to grow with the user’s accessibility settings and browser text scaling; do not clip enlarged text. These are starting sizes and can be adjusted after reviewing the screens.
 
-Colours: Dark charcoal text (**#202123**) on a white background (**#FFFFFF**). Main-action buttons use charcoal (**#202123**) with white labels (**#FFFFFF**). Errors use red (**#B91C1C**) for readable text on white, alongside a clear explanation; do not rely on colour alone or replace the call with a full-screen red alert. Keep blue for the orb. Orb colours, matched by eye from the builder's mockup and approved on 2026-10-07: deep blue **#5B8DEF** (swirls), sky blue **#A9CCF6** (body), pale blue **#D6E8FB** (edge), and **#F5F9FF** (white streaks). Ask before changing them. Unavailable main-action buttons use solid grey (**#6B6B6B**) with a white label (5.33:1 contrast).
+Colours: Dark charcoal text (**#202123**) on a white background (**#FFFFFF**). Main-action buttons use charcoal (**#202123**) with white labels (**#FFFFFF**). Errors use red (**#B91C1C**) for readable text on white, alongside a clear explanation; do not rely on colour alone or replace the call with a full-screen red alert. Keep blue for the orb. Orb colours, matched by eye from the builder's mockup and approved on 2026-10-07: deep blue **#5B8DEF** (swirls), sky blue **#A9CCF6** (body), pale blue **#D6E8FB** (edge), and **#F5F9FF** (white streaks). Ask before changing them. Unavailable main-action buttons use solid grey (**#6B6B6B**) with a white label (5.33:1 contrast). Green (**#16A34A**) is used only for the check next to “Safety setup ready” on Home (approved 2026-10-10).
 
 ## 4. Screens
 
@@ -316,7 +343,7 @@ For v1, do not send a test message or invitation when saving a contact. Show “
 
 **For:** Choosing a discreet code phrase, practising recognition, and saving it before using a real safety call.
 
-**Top to bottom:** Back → “Ask for help discreetly” → “Say this phrase during your call to alert your trusted contacts.” → “Your code phrase” field → “Choose something you can remember, but wouldn’t say casually during a call.” → “Practise phrase” → “Practice sends no alerts.”
+**Top to bottom:** Back → “Ask for help discreetly” → “Say this phrase during your call to alert your trusted contacts.” → “Your code phrase” field → “Choose something you can remember, but wouldn’t say casually during a call.” → “You can change it later.” → “Practise phrase” → “Practice sends no alerts.”
 
 **Main flow:** Enter phrase → “Practise phrase” → microphone permission if needed → say the phrase aloud → successful recognition → “Save and finish” → Home.
 
@@ -325,6 +352,7 @@ For v1, do not send a test message or invitation when saving a contact. Show “
 - **Recognised:** “Phrase recognised. In a real safety call, this would trigger an emergency alert.” Show “Save and finish”.
 - **Not recognised:** “We didn’t catch that. Try again or change your phrase.”
 - **Microphone unavailable:** Explain how to enable it and offer retry.
+- **Practice unavailable in this browser** (for example, inside WhatsApp's or Instagram's built-in browser): “Practice doesn’t work in this browser. Open this link in Chrome or Safari to practise.” Keep her typed phrase. Added 2026-10-10.
 - **Saved:** Go to Home with “Safety setup ready.”
 
 Practice never sends an alert. During a real call, the AI never announces the phrase or alert aloud. Keep the manual alert button available if recognition fails.
@@ -351,6 +379,7 @@ Practice never sends an alert. During a real call, the AI never announces the ph
 │  Choose something you can   │
 │  remember, but wouldn’t say │
 │  casually during a call.    │
+│  You can change it later. │
 │                             │
 │      [ Practise phrase ]    │
 │                             │

@@ -43,7 +43,7 @@ The contact page's “Call her” action requires her phone number. Hide that ac
 | Service | Decision and purpose | Secret-key location |
 | --- | --- | --- |
 | Sarvam | Chosen for the AI voice: real outbound phone calls through its Instant outbound API, from a number rented through Sarvam. Use the full Voice Agents API key (Settings → API Key). Calls cost per minute. | Convex server environment settings |
-| Resend | Chosen direction for delivering email login codes; Convex Auth handles sign-in | Convex server environment settings |
+| Resend | Delivers email login codes; Convex Auth handles sign-in. Connected 2026-10-10 with Resend's test sender, which only reaches the Resend account's own email until the builder verifies a domain (`AUTH_EMAIL_FROM`) | Convex server environment settings |
 | Twilio | Candidate for automatic SMS, not a final selection; verify eligibility and Indian SMS access for an individual builder before payment or integration | Convex server environment settings |
 | GitHub | Stores project code | Development tools; no GitHub secret in the client |
 

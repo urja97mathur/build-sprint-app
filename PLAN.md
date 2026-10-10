@@ -6,7 +6,7 @@ Status (2026-10-07): The builder chose a real phone call for the product. The pr
 
 1. ✓ I can open the private page on my phone, tap “Call me”, my phone rings, I answer, and I talk with the AI companion. Done 2026-10-07 for the builder's own number only (Android). Not covered yet: iPhone, other people's numbers, and detecting answered or ended calls.
 2. ✓ I can try a clearly labelled demo before signing up, without sending alerts or sharing my location, and judge whether the voice feels natural and reassuring. Done 2026-10-09: the public `/demo.html` page takes her mobile number and Sarvam's demo agent calls it once, for under a minute; all three limits tested on the builder's Android phone. Not covered yet: iPhone, the 20-a-day cap with real calls, and what the page says after the call.
-3. I can create an account using email-code verification, save one trusted contact and a code word, practise the code word without sending an alert, and add more contacts later.
+3. ✓ I can create an account using email-code verification, save one trusted contact and a code word, practise the code word without sending an alert, and add more contacts later. Done 2026-10-10 on the builder's Android phone, with her own email. Not covered yet: codes to anyone else's email (needs the builder's own domain verified in Resend), iPhone, and the Welcome illustration.
 4. I can start a safety call, keep talking on the phone while I walk, and share my location for that session from the page. Test that newly recorded location updates keep reaching the backend with the screen locked during a phone call, on iPhone and Android, in a safe setting. If location stops, report the failure and assess an Android-only APK with the builder before continuing on that platform.
 5. I can say my code word and have my trusted contact receive an emergency SMS with my latest location, without the AI announcing it aloud. Verify the SMS provider and account eligibility before integration or payment.
 6. I can miss repeated check-ins and have my contact receive a check-on-me alert; stopping alone does not send an emergency alert.
@@ -30,6 +30,7 @@ Run the thirty-minute, no-code voice check from PRODUCT.md while building. It ha
 - A trusted person joining the call.
 - City-based personalisation.
 - Sending a test SMS when adding a trusted contact.
+- Changing the code word after it's saved (2026-10-10: chosen once in this version).
 - An installed app, unless the browser location test shows it is needed. Android-only APK is the agreed next option to assess after a failed test.
 - The in-browser call: a two-second ringtone inside the page, then a blue-orb AI conversation in the browser with no “Answer” tap. Replaced by the real phone call on 2026-10-07.
 
@@ -37,7 +38,8 @@ Run the thirty-minute, no-code voice check from PRODUCT.md while building. It ha
 
 - **“I’m safe”:** she taps it on the page, says it to the AI, or both.
 - **Demo before sign-up:** decided 2026-10-07. She enters her phone number and gets one real demo call: one per number, ever; at most 20 a day across everyone; at most 60 seconds, opening with “Hi, this is the demo call you asked for from the companion app.” See CALL_TEST_SETUP.md.
-- **Code word and check-ins during a phone call:** the app does not hear the call, so Sarvam's agent would have to tell Convex when she says the code word or misses check-ins. Check what Sarvam supports before relying on it. This also decides how code-word practice works.
+- **Code word and check-ins during a phone call:** the app does not hear the call, so Sarvam's agent would have to tell Convex when she says the code word or misses check-ins. Check what Sarvam supports before relying on it. This also decides how code-word practice works. Sarvam's docs (read 2026-10-09, untested) describe an “API tool” the agent can call mid-call, and a webhook after each call with status, duration and transcript. Decided 2026-10-10: she chooses her code word after sign-up, never in the demo, and chooses it only once in this version. She practises it in the browser, by saying it into the page. The phone's browser listens, not Simran, so a successful practice doesn't prove Simran will catch the phrase on a call; check that in milestone 5.
+- **Her mobile number:** a real safety call must ring her phone, but the account asks only for name and email (the Users table lists the phone number as optional). Decide where in setup she gives her number before milestone 4.
 - **Call status:** the page cannot tell whether a call was answered or ended. Sarvam's outbound request accepts a `webhook_config`; check what it reports before relying on it. Also decide how long to wait on a call request before showing an error (the 10-second limit was for the in-browser call).
 - **Location during a phone call:** the page must stay open in the browser during the call. Untested with the screen locked.
 - **Demo label:** PRODUCT.md asks for “Demo only. No contacts are alerted or location shared.” The builder removed the demo line from the private call page on 2026-10-07. Since 2026-10-09 the demo call says it aloud (“yeh sirf demo hai…”); the demo page itself doesn't. Decide whether the page should say it too.

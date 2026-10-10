@@ -89,7 +89,7 @@ Clearly label the demo: **“Demo only. No contacts are alerted or location shar
 
 1. I can tap “Call me”, my phone rings, I answer, and I talk with the AI companion. (Done 2026-10-07 on the private test page, for the builder's own number.)
 2. I can try a clearly labelled demo before signing up, without sending alerts or sharing my location. (Done 2026-10-09: one real demo call per number, under a minute.)
-3. I can create an account, save one trusted contact and a code word, and add more contacts later.
+3. I can create an account, save one trusted contact and a code word, and add more contacts later. (Done 2026-10-10: email-code sign-in, trusted contacts, and a code phrase chosen once and practised in the browser. Codes reach only the builder's email until a domain is verified.)
 4. I can start a safety call, keep talking while I walk, and share my location for that session.
 5. I can say my code word and have my trusted contact receive an emergency alert with my latest location, without the AI announcing it aloud.
 6. I can miss repeated check-ins and have my contact receive a check-on-me alert; stopping alone does not send an emergency alert.
