@@ -2,9 +2,10 @@ import { ConvexError, v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server.js';
 import { normalisePhone } from './lib/phone.js';
+import { normaliseIndianMobile } from './lib/demo.js';
 import { cleanName, cleanPhrase, MAX_CONTACTS, nextStep } from './lib/setup.js';
 
-// Her safety setup after sign-in: name, trusted contacts and code phrase. Nothing here sends anything.
+// Her safety setup after sign-in: name, mobile number, trusted contacts and code phrase. Nothing here sends anything.
 
 async function requireUser(ctx) {
   const userId = await getAuthUserId(ctx);
@@ -14,7 +15,7 @@ async function requireUser(ctx) {
 const contactsOf = (ctx, userId) => ctx.db.query('trustedContacts').withIndex('by_user', q => q.eq('userId', userId)).collect();
 const phraseOf = (ctx, userId) => ctx.db.query('codePhrases').withIndex('by_user', q => q.eq('userId', userId)).first();
 
-// What's saved and which step is missing. Never returns the code phrase itself.
+// What's saved, which step is missing, and any safety session in progress. Never returns the code phrase or her number.
 export const status = query({
   args: {},
   handler: async ctx => {
@@ -23,19 +24,38 @@ export const status = query({
     if (!user) return null;
     const contacts = (await contactsOf(ctx, userId)).length;
     const codeWordSaved = Boolean(await phraseOf(ctx, userId));
-    return { name: user.name ?? null, contacts, codeWordSaved, nextStep: nextStep({ name: user.name, contacts, codeWordSaved }) };
+    const hasPhone = Boolean(user.phone);
+    const session = await ctx.db.query('safetySessions').withIndex('by_user_status', q => q.eq('userId', userId).eq('status', 'active')).first();
+    return {
+      name: user.name ?? null,
+      hasPhone,
+      contacts,
+      codeWordSaved,
+      nextStep: nextStep({ name: user.name, hasPhone, contacts, codeWordSaved }),
+      activeSession: session?._id ?? null,
+    };
   },
 });
 
-// Sets her name on a new account. An existing name is kept.
-export const setName = mutation({
-  args: { name: v.string() },
-  handler: async (ctx, { name }) => {
+// Her name and mobile number. Each is saved only if the account doesn't have one yet.
+export const saveProfile = mutation({
+  args: { name: v.optional(v.string()), phone: v.optional(v.string()) },
+  handler: async (ctx, args) => {
     const userId = await requireUser(ctx);
-    const clean = cleanName(name);
-    if (!clean) throw new ConvexError({ field: 'name', message: 'Enter your name.' });
     const user = await ctx.db.get(userId);
-    if (!user.name) await ctx.db.patch(userId, { name: clean });
+    const changes = {};
+    if (args.name !== undefined && !user.name) {
+      const name = cleanName(args.name);
+      if (!name) throw new ConvexError({ field: 'name', message: 'Enter your name.' });
+      changes.name = name;
+    }
+    if (args.phone !== undefined && !user.phone) {
+      // Simran calls this number from an Indian number, so it must be an Indian mobile.
+      const phone = normaliseIndianMobile(args.phone);
+      if (!phone) throw new ConvexError({ field: 'phone', message: 'Check this phone number' });
+      changes.phone = phone;
+    }
+    if (Object.keys(changes).length) await ctx.db.patch(userId, changes);
   },
 });
 

@@ -6,7 +6,7 @@ When you run a shell command, always pass workdir set to the absolute path of th
 
 ## Current authorization
 
-On 2026-10-06 the builder authorized a small real-phone-call test page: “Call me” → Convex requests a Sarvam outbound call → her phone rings → she answers. It worked on 2026-10-07 on her Android phone, and she chose the real phone call for the full product. Calls stay restricted to the builder's configured test number, and service keys stay in Convex environment settings. Do not build sign-in, location, alerts or the next milestone until the builder says yes to it. See CALL_TEST_SETUP.md for setup and limitations, and “Decisions still needed” in PLAN.md.
+On 2026-10-06 the builder authorized a small real-phone-call test page: “Call me” → Convex requests a Sarvam outbound call → her phone rings → she answers. It worked on 2026-10-07 on her Android phone, and she chose the real phone call for the full product. Since milestone 4 (approved 2026-10-12), “Call me” on Home calls each signed-in user's own saved number, at most one request a minute and 10 a day; the private call test still calls only the builder's configured test number. Service keys stay in Convex environment settings. Do not build sign-in, location, alerts or the next milestone until the builder says yes to it. See CALL_TEST_SETUP.md for setup and limitations, and “Decisions still needed” in PLAN.md.
 
 ## 1. How the product works
 
@@ -61,7 +61,7 @@ Test on both iPhone and Android phones, in the safety-call milestone:
 4. If both keep working, continue with the web approach.
 5. If location stops, report the device and observed failure. That is the reason to assess an Android-only APK (an installable Android app) next; do not silently change platforms.
 
-This test has not been run. Passing it does not prove SMS alerts, check-in handling, or the entire safety flow works; those need their own tests. Never describe the product as reliable or complete based only on code inspection.
+Run on Android on 2026-10-12: the call kept going with the screen locked, but location updates stopped once the call came in (two positions in the first seconds, none after). On 2026-10-13 the builder chose to continue with milestone 5 and assess the APK later. iPhone is untested (a later version). Passing it does not prove SMS alerts, check-in handling, or the entire safety flow works; those need their own tests. Never describe the product as reliable or complete based only on code inspection.
 
 ### Hosting and tooling
 

@@ -23,6 +23,31 @@ export default defineSchema({
     savedAt: v.number(),
   }).index('by_user', ['userId']),
 
+  // A safety session: from "Call me" until she taps "I'm safe". Each call request's time is kept for the limits.
+  safetySessions: defineTable({
+    userId: v.id('users'),
+    status: v.union(v.literal('active'), v.literal('ended')),
+    startedAt: v.number(),
+    callStatus: v.union(v.literal('requesting'), v.literal('requested'), v.literal('unconfirmed'), v.literal('refused')),
+    callTimes: v.array(v.number()),
+    endedAt: v.optional(v.number()),
+    safeConfirmedAt: v.optional(v.number()),
+  })
+    .index('by_user', ['userId', 'startedAt'])
+    .index('by_user_status', ['userId', 'status']),
+
+  // Her latest position during a session (one row per session, replaced on each update), and how many arrived.
+  sessionLocations: defineTable({
+    sessionId: v.id('safetySessions'),
+    userId: v.id('users'),
+    latitude: v.number(),
+    longitude: v.number(),
+    accuracy: v.number(), // metres
+    measuredAt: v.number(), // when her phone measured it
+    receivedAt: v.number(), // when Convex received it
+    updates: v.number(),
+  }).index('by_session', ['sessionId']),
+
   // Demo calls before sign-up. Phone numbers are stored only as a keyed fingerprint, never as numbers.
   demoCalls: defineTable({
     numberHash: v.string(),

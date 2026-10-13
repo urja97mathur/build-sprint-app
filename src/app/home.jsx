@@ -1,18 +1,28 @@
 import { useEffect, useState } from 'react';
+import { useAction } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
-import { ChevronRight, LockIcon, PersonIcon, PlayIcon, ReadyIcon, Status, go } from './ui.jsx';
+import { api } from '../../convex/_generated/api.js';
+import { startCall } from './session.jsx';
+import { ChevronRight, LockIcon, PersonIcon, PlayIcon, ReadyIcon, Status, clearFlash, go, readFlash } from './ui.jsx';
 
-const MISSING = { contact: 'Add a trusted contact', codeword: 'Choose your code phrase' };
+const MISSING = { phone: 'Add your mobile number', contact: 'Add a trusted contact', codeword: 'Choose your code phrase' };
 const HEADLINE = 'A voice with you on your walk.';
 
-// Home after sign-in. "Call me" for a real safety call comes in milestone 4.
+// Home after sign-in: "Call me" once setup is ready, otherwise the missing step.
 export function Home({ status }) {
   const { signOut } = useAuthActions();
+  const start = useAction(api.safety.start);
   const [leaving, setLeaving] = useState(false);
+  const [flash] = useState(readFlash);
+  useEffect(() => clearFlash(), []);
 
   async function logOut() {
     setLeaving(true);
     try { await signOut(); } finally { go('login', { replace: true }); }
+  }
+  function callMe() {
+    startCall(start);
+    go('session');
   }
 
   return (
@@ -24,7 +34,11 @@ export function Home({ status }) {
           <button type="button" className="primary" onClick={() => go(status.nextStep)}>Finish setup</button>
         </div>
       ) : (
-        <p className="ready" role="status"><ReadyIcon /> Safety setup ready</p>
+        <>
+          <button type="button" className="primary call-me" onClick={callMe}>Call me</button>
+          {flash && <Status message={flash} center />}
+          <p className="ready" role="status"><ReadyIcon /> Safety setup ready</p>
+        </>
       )}
       <ul className="rows">
         <li>

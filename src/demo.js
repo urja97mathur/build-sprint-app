@@ -47,6 +47,8 @@ input.addEventListener('input', update);
 form.addEventListener('submit', async event => {
   event.preventDefault();
   if (button.disabled) return;
+  // Remembered in this browser only, so sign-up can fill in her number. The server keeps only a fingerprint.
+  try { localStorage.setItem('walking-companion-phone', input.value.trim()); } catch {}
   busy = true;
   update();
   button.textContent = 'Requesting call…';

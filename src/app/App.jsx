@@ -2,22 +2,24 @@ import { useEffect } from 'react';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../convex/_generated/api.js';
-import { Account, FinishName, Login, Verify, Welcome, clearPending, readPending } from './signin.jsx';
+import { Account, Login, ProfileStep, Verify, Welcome, clearPending, readPending } from './signin.jsx';
 import { AddContact, ContactList } from './contacts.jsx';
 import { CodeWord } from './codeword.jsx';
 import { Home, Loading } from './home.jsx';
+import { Session, callStarting } from './session.jsx';
 import { Redirect, useRoute } from './ui.jsx';
 
-// Welcome → demo → account → email code → trusted contact → code phrase → Home.
+// Welcome → demo → account → email code → trusted contact → code phrase → Home → "Call me" → safety session.
 // Signed-out visitors see only Welcome and the sign-in screens; signed-in ones go to the first missing step or Home.
+// While a safety session is on, the app always opens on it, until she taps "I'm safe".
 export default function App() {
   const route = useRoute();
   const { isLoading, isAuthenticated } = useConvexAuth();
   const status = useQuery(api.setup.status, isAuthenticated ? {} : 'skip');
 
-  // A sign-in that's finished no longer needs its saved details, unless the name step still uses them.
+  // A finished sign-in no longer needs its saved details, unless the name or number step still uses them.
   useEffect(() => {
-    if (status && status.nextStep !== 'name' && readPending()) clearPending();
+    if (status && !['name', 'phone'].includes(status.nextStep) && readPending()) clearPending();
   }, [status]);
 
   if (isLoading) return <Loading />;
@@ -30,10 +32,13 @@ export default function App() {
   }
   if (status === undefined) return <Loading />;
   if (status === null) return <SignOut />;
-  if (status.nextStep === 'name') return <FinishName />;
+  if (status.nextStep === 'name') return <ProfileStep step="name" />;
+  if (status.activeSession && route !== 'session') return <Redirect to="session" />;
 
   switch (route) {
     case 'home': return <Home status={status} />;
+    case 'session': return status.activeSession || callStarting() ? <Session /> : <Redirect to="home" />;
+    case 'phone': return status.hasPhone ? <Redirect to="home" /> : <ProfileStep step="phone" />;
     case 'contacts': return <ContactList />;
     case 'contact': return <AddContact nextStep={status.nextStep} />;
     case 'add-contact': return <AddContact fromList />;

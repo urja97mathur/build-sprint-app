@@ -46,6 +46,14 @@ Demo settings, on the Production deployment:
 
 Sarvam demo agent: duplicate the agent, and in its Settings tab set “Max call length” to 1 minute. Setting the same opening as its greeting is a fallback in case Sarvam ignores the one sent with the call. Whether the minute counts from ringing or from answering is untested.
 
+## Safety call (milestone 4)
+
+On Home, once setup is ready (name, mobile number, a trusted contact, a saved code phrase), “Call me” starts a safety session: Convex asks Sarvam's **main agent** (`SARVAM_OUTBOUND_CONFIG`, the same agent as the private call test) to call the number saved on her own account, opening with “Hieee! Simran here. Walk pe nikle ho? Chalo, saath chalte hain!” (no name, because the number isn't checked). Limits, checked in Convex: one call request a minute and at most 10 in any 24 hours per account. The session screen shows the call's status, “Location sharing is on” only while positions are reaching Convex, and “I’m safe”, which ends the session and location sharing. Only her latest position is kept for each session (`sessionLocations`), with a count of how many arrived. Nothing is sent to contacts yet. Tested on the builder's Android phone (2026-10-12/13): the call kept going with the screen locked, but positions stopped reaching Convex once the call came in. Not fixed yet.
+
+Her number: the Account screen asks for it, filled in from the demo page if she typed it there in the same browser (kept in that browser only). Accounts without a number see “Add your mobile number”. Indian mobiles only, like the demo.
+
+Main agent in Sarvam (builder's instructions, plus four lines added 2026-10-12): alerts aren't switched on yet, so never say anyone was alerted; never guess her location; in danger, tell her to hang up and dial 112; don't bring up being an AI, but never claim to be a real person if asked. Max call length: 30 minutes.
+
 ## Sign-up and setup (milestone 3)
 
 Pages: the main address (`/`) is Welcome, sign-in, setup and Home; `/app.html` forwards there. The demo page links to sign-up with “Set up my safety call”. Sign-in uses Convex Auth: a six-digit code sent to her email through Resend, valid for 15 minutes, with at most 10 wrong codes an hour per email. Her account, trusted contacts (in order) and code phrase are stored in Convex (`convex/setup.js`). The code phrase is saved once, after a successful practice, and can't be changed. Practice uses the browser's own speech recognition; nothing is sent to anyone.

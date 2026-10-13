@@ -4,7 +4,8 @@ import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api.js';
 import { cleanName } from '../../convex/lib/setup.js';
 import { CODE_MINUTES } from '../../convex/lib/email.js';
-import { Field, Status, TimeoutError, TopBar, go, problem, withTimeout } from './ui.jsx';
+import { normaliseIndianMobile } from '../../convex/lib/demo.js';
+import { Field, PhoneField, Status, TimeoutError, TopBar, fieldOf, go, problem, withTimeout } from './ui.jsx';
 
 // The sign-in in progress (name, email, where it started, when the code was sent), kept for this tab only.
 const KEY = 'pending-sign-in';
@@ -19,6 +20,10 @@ export function clearPending() {
 }
 
 const looksLikeEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// The number she typed on the demo page in this browser, if any (see src/demo.js).
+function demoPhone() {
+  try { return localStorage.getItem('walking-companion-phone') ?? ''; } catch { return ''; }
+}
 const UNCONFIRMED_SEND = 'We couldn’t confirm the code was sent. Check your inbox or try again.';
 
 // 'sent', 'uncertain' (no answer within 10 seconds; the code may still arrive) or 'failed'.
@@ -59,16 +64,20 @@ export function Account() {
   const kept = readPending()?.from === 'account' ? readPending() : null;
   const [name, setName] = useState(kept?.name ?? '');
   const [email, setEmail] = useState(kept?.email ?? '');
+  const [fromDemo] = useState(() => (kept?.phone ? '' : demoPhone()));
+  const [phone, setPhone] = useState(kept?.phone?.replace(/^\+91/, '') ?? fromDemo);
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const filled = name.trim() && email.trim() && phone.trim();
 
   async function submit(event) {
     event.preventDefault();
-    if (busy || !name.trim() || !email.trim()) return;
-    const clean = { name: cleanName(name), email: email.trim().toLowerCase() };
+    if (busy || !filled) return;
+    const clean = { name: cleanName(name), email: email.trim().toLowerCase(), phone: normaliseIndianMobile(phone) };
     if (!clean.name) return setErrors({ name: 'Use 80 characters or fewer.' });
     if (!looksLikeEmail(clean.email)) return setErrors({ email: 'Check this email address' });
+    if (!clean.phone) return setErrors({ phone: 'Check this phone number' });
     setErrors({});
     setMessage('');
     setBusy(true);
@@ -88,7 +97,9 @@ export function Account() {
           error={errors.name} autoComplete="name" maxLength={80} disabled={busy} />
         <Field id="email" label="Your email" placeholder="you@example.com" type="email" value={email} onChange={e => setEmail(e.target.value)}
           error={errors.email} autoComplete="email" inputMode="email" disabled={busy} />
-        <button type="submit" className="primary" disabled={busy || !name.trim() || !email.trim()}>{busy ? 'Continuing…' : 'Continue'}</button>
+        <PhoneField id="phone" label="Your mobile number" value={phone} onChange={e => setPhone(e.target.value)} error={errors.phone}
+          hint={fromDemo && phone === fromDemo ? 'From your demo call. Check it’s right.' : 'Simran will call this number.'} disabled={busy} />
+        <button type="submit" className="primary" disabled={busy || !filled}>{busy ? 'Continuing…' : 'Continue'}</button>
       </form>
       <Status message={message} error center />
       <Switch question="Already have an account?" action="Log in" to="login" />
@@ -222,23 +233,27 @@ function AccountRedirect() {
   return null;
 }
 
-// After a verified sign-in with no name on the account. A name typed on the account screen is used automatically.
-export function FinishName() {
-  const saveName = useMutation(api.setup.setName);
-  const typed = readPending()?.name ?? '';
-  const [name, setName] = useState(typed);
+// After a verified sign-in: her name (`step` 'name') or mobile number ('phone') if the account doesn't have it.
+// What she typed on the account screen is saved automatically; otherwise she types it here.
+export function ProfileStep({ step }) {
+  const saveProfile = useMutation(api.setup.saveProfile);
+  const [typed] = useState(() => {
+    const pending = readPending();
+    return pending?.name || pending?.phone ? { name: pending.name, phone: pending.phone } : null;
+  });
+  const [value, setValue] = useState(() => (step === 'phone' ? demoPhone() : ''));
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(Boolean(typed));
   const tried = useRef(false);
 
-  async function save(value) {
+  async function save(profile) {
     setBusy(true);
     setMessage('');
     try {
-      await withTimeout(saveName({ name: value }));
+      await withTimeout(saveProfile(profile));
       clearPending();
     } catch (error) {
-      setMessage(problem(error, 'Couldn’t continue. Try again.'));
+      setMessage(fieldOf(error) ? problem(error, 'Check this') : problem(error, 'Couldn’t continue. Try again.'));
       setBusy(false);
     }
   }
@@ -246,15 +261,31 @@ export function FinishName() {
     if (typed && !tried.current) { tried.current = true; save(typed); }
   }, []);
 
+  function submit(event) {
+    event.preventDefault();
+    if (busy || !value.trim()) return;
+    if (step === 'phone' && !normaliseIndianMobile(value)) return setMessage('Check this phone number');
+    save(step === 'phone' ? { phone: value } : { name: value });
+  }
+
   if (typed && busy) return <main className="ui middle"><Status message="Continuing…" center /></main>;
   return (
     <main className="ui">
       <TopBar />
-      <h1 className="title center">Let’s finish setting up your account</h1>
-      <form className="form" onSubmit={event => { event.preventDefault(); if (!busy && name.trim()) save(name); }} noValidate>
-        <Field id="name" label="Your name" placeholder="e.g. Taylor Smith" value={name} onChange={e => setName(e.target.value)}
-          autoComplete="name" maxLength={80} disabled={busy} />
-        <button type="submit" className="primary" disabled={busy || !name.trim()}>{busy ? 'Continuing…' : 'Continue'}</button>
+      {step === 'phone' ? (
+        <>
+          <h1 className="title center">Add your mobile number</h1>
+          <p className="subtitle center">Simran will call this number when you tap Call me.</p>
+        </>
+      ) : (
+        <h1 className="title center">Let’s finish setting up your account</h1>
+      )}
+      <form className="form" onSubmit={submit} noValidate>
+        {step === 'phone'
+          ? <PhoneField id="phone" label="Your mobile number" value={value} onChange={e => setValue(e.target.value)} disabled={busy} />
+          : <Field id="name" label="Your name" placeholder="e.g. Taylor Smith" value={value} onChange={e => setValue(e.target.value)}
+              autoComplete="name" maxLength={80} disabled={busy} />}
+        <button type="submit" className="primary" disabled={busy || !value.trim()}>{busy ? 'Continuing…' : 'Continue'}</button>
       </form>
       <Status message={message} error center />
     </main>

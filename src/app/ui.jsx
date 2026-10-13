@@ -21,6 +21,17 @@ export function Redirect({ to }) {
   return null;
 }
 
+// A one-time message for the next screen, such as "Session ended…" on Home. Kept for this tab only.
+export function setFlash(text) {
+  try { sessionStorage.setItem('flash', text); } catch {}
+}
+export function readFlash() {
+  try { return sessionStorage.getItem('flash') ?? ''; } catch { return ''; }
+}
+export function clearFlash() {
+  try { sessionStorage.removeItem('flash'); } catch {}
+}
+
 export class TimeoutError extends Error {}
 export function withTimeout(promise, ms = 10000) {
   let timer;
@@ -61,6 +72,23 @@ export function Field({ id, label, error, hint, hiddenLabel = false, ...input })
     <div className="field">
       <label className={hiddenLabel ? 'visually-hidden' : 'label'} htmlFor={id}>{label}</label>
       <input id={id} className="input" aria-invalid={Boolean(error)} aria-describedby={describedBy} {...input} />
+      {hint && <p id={`${id}-hint`} className="hint">{hint}</p>}
+      {error && <p id={`${id}-error`} className="field-error">{error}</p>}
+    </div>
+  );
+}
+
+// Her Indian mobile number, with a fixed +91 in front (the same field as the demo page).
+export function PhoneField({ id, label, error, hint, ...input }) {
+  const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+  return (
+    <div className="field">
+      <label className="label" htmlFor={id}>{label}</label>
+      <div className="phone-input">
+        <span>+91</span>
+        <input id={id} type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={16} placeholder="98765 43210"
+          aria-invalid={Boolean(error)} aria-describedby={describedBy} {...input} />
+      </div>
       {hint && <p id={`${id}-hint`} className="hint">{hint}</p>}
       {error && <p id={`${id}-error`} className="field-error">{error}</p>}
     </div>

@@ -115,9 +115,13 @@ Colours: Dark charcoal text (**#202123**) on a white background (**#FFFFFF**). M
 [Screen]: for [what]. Top to bottom: [what's on it]. Main action: [button words] → [where it goes]
 Empty: [words] · Loading: [words] · Error: [words] · Done: [words]
 
-### Active safety-call screen
+### Safety session screen (phone call) — approved 2026-10-12 for milestone 4
 
-**Needs redesign for the phone call.** This screen was designed for the in-browser call. With a real phone call, the conversation, mute and speaker are in the phone's call app, the in-page ringtone and “no Answer tap” no longer apply, and the page cannot yet tell whether the call connected, was answered or ended. The alert, SMS, safety-update and “I’m safe” rules below still apply. Redesign this screen after the decisions in PLAN.md.
+Shown after she taps “Call me” on Home, in the public pages' style (`design/active-call-2026-10-05.png`, adapted). Top to bottom: the swirl orb → “Call requested. Answer when your phone rings.” (never “Connected”: the page can't confirm the call) → “Location sharing is on” only while location updates are actually reaching Convex (otherwise its real status, such as unavailable or the last update time) → “I’m safe” (charcoal) → nothing else for now. “I’m safe” ends the session and stops location sharing. Mute and Speaker are dropped: they're on her phone's call screen. “Alert my contact” comes in milestone 5. Sessions start and end only on the page in this milestone; contact updates on “I’m safe” come in milestone 8.
+
+### Active safety-call screen (in-browser call, replaced)
+
+**Needs redesign for the phone call.** Replaced by the safety session screen above for what milestone 4 builds; the rules below for alerts, SMS, safety updates and “I’m safe” still apply when those milestones arrive. This screen was designed for the in-browser call. With a real phone call, the conversation, mute and speaker are in the phone's call app, the in-page ringtone and “no Answer tap” no longer apply, and the page cannot yet tell whether the call connected, was answered or ended. The alert, SMS, safety-update and “I’m safe” rules below still apply. Redesign this screen after the decisions in PLAN.md.
 
 **For:** Staying on an AI call while walking, asking for help without changing screens, and confirming safety.
 
@@ -511,7 +515,7 @@ If location permission is missing, show the specific issue and ask for permissio
 
 - [a rule that holds on every screen]
 - Keep the conversation central and the number of decisions small.
-- Identify the voice as AI; do not imply a real person is on the call. On the phone call, this depends on the Sarvam agent's greeting, which has not been checked.
+- Identify the voice as AI where she first meets it: the demo call says so in its opening. The safety call (main agent) doesn't bring it up, because she already knows, but never claims to be a real person if asked directly (builder's decision, 2026-10-12).
 - Use text alongside animation to communicate status.
 - Never promise protection, invent location, or give unverified route advice.
 - Stopping alone does not mean danger; repeated missed check-ins and the code word have different alert meanings.

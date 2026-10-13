@@ -47,11 +47,12 @@ test('the code email goes to Resend with the key in a header, and refusals log t
   await assert.rejects(sendLoginCode('her@example.com', '1', {}, () => assert.fail('must not call Resend')));
 });
 
-test('setup steps come in DESIGN.md order: name, trusted contact, code word', () => {
-  assert.equal(nextStep({ name: null, contacts: 0, codeWordSaved: false }), 'name');
-  assert.equal(nextStep({ name: 'Urja', contacts: 0, codeWordSaved: false }), 'contact');
-  assert.equal(nextStep({ name: 'Urja', contacts: 1, codeWordSaved: false }), 'codeword');
-  assert.equal(nextStep({ name: 'Urja', contacts: 2, codeWordSaved: true }), null);
+test('setup steps come in order: name, mobile number, trusted contact, code word', () => {
+  assert.equal(nextStep({ name: null, hasPhone: false, contacts: 0, codeWordSaved: false }), 'name');
+  assert.equal(nextStep({ name: 'Urja', hasPhone: false, contacts: 1, codeWordSaved: true }), 'phone');
+  assert.equal(nextStep({ name: 'Urja', hasPhone: true, contacts: 0, codeWordSaved: false }), 'contact');
+  assert.equal(nextStep({ name: 'Urja', hasPhone: true, contacts: 1, codeWordSaved: false }), 'codeword');
+  assert.equal(nextStep({ name: 'Urja', hasPhone: true, contacts: 2, codeWordSaved: true }), null);
   assert.equal(cleanName('  Urja   Mathur '), 'Urja Mathur');
   assert.equal(cleanName('   '), null);
   assert.equal(cleanName('x'.repeat(81)), null);

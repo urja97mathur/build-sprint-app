@@ -83,6 +83,15 @@ button { font: inherit; cursor: pointer; }
 .row-detail { font-size: 14px; color: #5C5C5C; }
 .logout { align-self: center; margin-top: 20px; }
 
+/* "Call me" on Home: the one large action. */
+.call-me { min-height: 60px; margin-bottom: 18px; font-size: 18px; }
+
+/* Safety session: orb, the call's status, whether location is reaching Convex, "I'm safe". */
+.session .orb { margin-top: 0; }
+.session .status { margin: 0 0 10px; }
+.location { margin-bottom: 28px; color: #5C5C5C; }
+.location.error { color: #B91C1C; }
+
 /* Trusted contacts: choosing between a contact's numbers, and the button under the list. */
 .choices { border: 0; padding: 0; margin-left: 0; margin-right: 0; }
 .choices legend { padding: 0; }

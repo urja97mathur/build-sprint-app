@@ -13,8 +13,9 @@ export function cleanPhrase(input) {
 }
 
 // The first missing setup step, in DESIGN.md's order, or null when setup is ready.
-export function nextStep({ name, contacts, codeWordSaved }) {
+export function nextStep({ name, hasPhone, contacts, codeWordSaved }) {
   if (!name) return 'name';
+  if (!hasPhone) return 'phone';
   if (!contacts) return 'contact';
   if (!codeWordSaved) return 'codeword';
   return null;
