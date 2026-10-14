@@ -29,11 +29,22 @@ export const CALL_PROBLEMS = {
   missing: 'The calling connection isn’t set up yet.',
 };
 
+// A private key for each session. Sent to Sarvam with each call, so the agent's code-word tool can say which
+// session it heard the phrase on. 64 hex characters.
+export function newCallKey() {
+  return [...crypto.getRandomValues(new Uint8Array(32))].map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 // 'requested', 'refused' (Sarvam clearly said no) or 'unconfirmed' (the phone may still ring).
-export async function requestSafetyCall({ env, setup, phone, fetcher = fetch, timeoutMs = 10000 }) {
+// `variables` are the agent variables for this call: the session's key and her code phrase.
+export async function requestSafetyCall({ env, setup, phone, variables, fetcher = fetch, timeoutMs = 10000 }) {
   const url = `https://apps.sarvam.ai/api/outbounds/v1/orgs/${encodeURIComponent(env.SARVAM_ORG_ID)}/workspaces/${encodeURIComponent(env.SARVAM_WORKSPACE_ID)}/outbounds`;
   const payload = {
-    app_config: { ...setup.app, app_overrides: { ...setup.app.app_overrides, initial_bot_message: SAFETY_OPENING } },
+    app_config: {
+      ...setup.app,
+      agent_variables: { ...setup.app.agent_variables, ...variables },
+      app_overrides: { ...setup.app.app_overrides, initial_bot_message: SAFETY_OPENING },
+    },
     user_config: { user_phone_number: phone },
   };
   try {

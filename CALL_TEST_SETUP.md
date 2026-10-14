@@ -54,6 +54,33 @@ Her number: the Account screen asks for it, filled in from the demo page if she 
 
 Main agent in Sarvam (builder's instructions, plus four lines added 2026-10-12): alerts aren't switched on yet, so never say anyone was alerted; never guess her location; in danger, tell her to hang up and dial 112; don't bring up being an AI, but never claim to be a real person if asked. Max call length: 30 minutes.
 
+## Code word on a call (milestone 5, step 1)
+
+Each safety call sends Sarvam two agent variables: `session_key` (a private key for that session, kept in `safetySessions.callKey` and never sent to the page) and `code_phrase` (her saved phrase). When Simran hears the phrase, she calls the API tool `code_word_heard`, which posts `{"session_key": …}` to `/api/code-word`. Convex (`convex/alerts.js`) records one open emergency alert for the session, with her latest position and the time it was measured; hearing the phrase again only counts a repeat. A code word still counts after “I’m safe” for 35 minutes after her last call request, because the call may still be going. “I’m safe” closes the session's open alert. The logs show only the outcome (“Code word: recorded.”), never the key. Nothing is sent to contacts yet. The private call test sends no key, so it can't record an alert.
+
+Main agent in Sarvam:
+
+1. **Variables → Input variables:** add `session_key` and `code_phrase`, both with an empty default. Sarvam's docs describe a “send to LLM” switch for each variable (off would suit `session_key`), but the builder's screen didn't show one on 2026-10-14; it works without it.
+2. **Tools → API tool:** name `code_word_heard`; description “Call this quietly as soon as the caller says her code phrase.”; runs during the conversation; `POST https://gregarious-canary-491.convex.site/api/code-word`; JSON body `{"session_key": "@session_key"}` (pick the variable with @); no auth; max wait 5 seconds. Response template: “Done. Say nothing about this and carry on the conversation as before.” Pressing Test with the empty default should show a 400 reply, which means our server was reached.
+3. **Enable the tool on the agent** and add to its instructions: “The caller has a private code phrase: @code_phrase. If she says it, or something that clearly sounds like it, at any point in the call, call tool:code_word_heard straight away. Don't repeat the phrase, don't say you heard it, and never mention alerts, contacts, her location or the tool. Don't change your tone or ask whether she's okay because of it; carry on the conversation naturally from where it was. If she says it again later, call the tool again. If the code phrase is empty, ignore this paragraph.”
+4. **Publish**, and set the new version number as `app_version` in `SARVAM_OUTBOUND_CONFIG`. Done 2026-10-14: version 2.
+
+Sarvam's own after-call label (output variable “Walk session outcome”) doesn't know about the code phrase yet: a test call where she said it was labelled `pleasant_chat`. Our app doesn't read it. Fix at the next agent change by adding a value such as `code_phrase_said` to its extraction prompt.
+
+## WhatsApp alert (milestone 5)
+
+When a code word records a new alert, Convex (`convex/alerts.js`, `convex/lib/whatsapp.js`) sends the `emergency_alert` template once to her first trusted contact through Meta's WhatsApp Cloud API. The three blanks are her name, the alert time in IST, and her last known location as a Google Maps link with the time it was recorded (or “unavailable”). Each attempt is kept in `alertDeliveries`: `sent` means WhatsApp accepted the message, not that it was delivered or read; `failed` keeps WhatsApp's error code; `unconfirmed` means we couldn't tell (for example, a timeout). It is never resent automatically. The logs get the status and error code only.
+
+Meta setup (done 2026-10-14): app “Companion” on developers.facebook.com, with Meta's free test number. The test number only messages the up to 5 numbers added under API Setup → “To”, so her first trusted contact's number must be one of them. Skip “Production setup” (real number, payment) and business verification until the builder approves going live.
+
+Settings on Production:
+
+- `WHATSAPP_TOKEN`: permanent key from a system user (business.facebook.com/settings → Users → System users → Generate new token, expiry Never, with `whatsapp_business_messaging` and `whatsapp_business_management`). The key shown on API Setup expires after 24 hours.
+- `WHATSAPP_PHONE_NUMBER_ID`: Meta's ID for the test number (API Setup, Step 1, or the number in the sample request's address), not the phone number.
+- `WHATSAPP_APP_SECRET`: App settings → Basic → App secret → Show. For checking webhooks later. On 2026-10-14 the saved value was the masked dots, not the secret; replace it before webhooks.
+
+Template `emergency_alert` (Utility, English, variable type Number), submitted 2026-10-14: header “Emergency alert from Companion”; body “Hey! An emergency alert was triggered by {{1}} during her safety call. She needs help now. Alert time: {{2}} Last known location: {{3}} Sent automatically by the Companion app.” Its validity is Meta's default 10 minutes: an undelivered message is dropped after that. Raise it to the longest allowed. An earlier `safety_alert` was submitted with empty variables and isn't used.
+
 ## Sign-up and setup (milestone 3)
 
 Pages: the main address (`/`) is Welcome, sign-in, setup and Home; `/app.html` forwards there. The demo page links to sign-up with “Set up my safety call”. Sign-in uses Convex Auth: a six-digit code sent to her email through Resend, valid for 15 minutes, with at most 10 wrong codes an hour per email. Her account, trusted contacts (in order) and code phrase are stored in Convex (`convex/setup.js`). The code phrase is saved once, after a successful practice, and can't be changed. Practice uses the browser's own speech recognition; nothing is sent to anyone.

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { ConvexError } from 'convex/values';
 import { api } from '../../convex/_generated/api.js';
-import { Orb, Status, TimeoutError, go, problem, setFlash, withTimeout } from './ui.jsx';
+import { Orb, ReadyIcon, Status, TimeoutError, go, problem, setFlash, withTimeout } from './ui.jsx';
 
 // Asks Convex for the call. A timeout or lost connection may still ring her phone, so it counts as unconfirmed.
 function requestCall(start) {
@@ -26,6 +26,34 @@ const CALL = {
   refused: { text: 'Couldn’t place the call. Try again.', error: true },
 };
 const time = at => new Date(at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+// The alert her code word sent: who it went to, whether WhatsApp accepted it (not whether it was seen),
+// and the location her contact was sent, with the same map link.
+function AlertCard({ alert }) {
+  const to = alert.contactName ? ` to ${alert.contactName}` : '';
+  const status = alert.delivery?.status ?? 'sending';
+  const line =
+    status === 'sent' ? { text: `Alert sent${to} on WhatsApp, ${time(alert.delivery.sentAt)}`, sent: true }
+    : status === 'failed' ? { text: `Couldn’t send the alert${to}.`, error: true }
+    : status === 'unconfirmed' ? { text: 'We couldn’t confirm the alert reached WhatsApp.', error: true }
+    : { text: `Sending alert${to}…` };
+  const { location } = alert;
+  return (
+    <section className="alert-card" aria-label="Emergency alert">
+      <p className={`alert-status${line.error ? ' error' : ''}`} role="status" aria-live="polite">
+        {line.sent && <ReadyIcon />}<span>{line.text}</span>
+      </p>
+      {location ? (
+        <p className="alert-location">
+          Location shared:<br />recorded at {time(location.measuredAt)}<br />
+          <a className="text-link" href={`https://maps.google.com/?q=${location.latitude.toFixed(5)},${location.longitude.toFixed(5)}`} target="_blank" rel="noopener noreferrer">View on map</a>
+        </p>
+      ) : (
+        <p className="alert-location">Location shared: unavailable</p>
+      )}
+    </section>
+  );
+}
 
 // The safety session: the call's status, whether her location is reaching Convex, and "I'm safe".
 export function Session() {
@@ -145,6 +173,7 @@ export function Session() {
       <Orb />
       <Status message={callView.text} error={callView.error} center />
       {sessionId && <p className={`location${location.error ? ' error' : ''}`} role="status">{location.text}</p>}
+      {session?.alert && <AlertCard alert={session.alert} />}
       <div className="actions">
         <button type="button" className="primary" onClick={imSafe} disabled={!sessionId || ending}>{ending ? 'Ending…' : 'I’m safe'}</button>
         {sessionId && state !== 'requesting' && (

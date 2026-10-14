@@ -4,6 +4,7 @@ import { httpAction } from './_generated/server.js';
 import { components, internal } from './_generated/api.js';
 import { handleCall } from './lib/call.js';
 import { handleDemoCall } from './lib/demo.js';
+import { handleCodeWord } from './lib/alerts.js';
 import { auth } from './auth.js';
 
 const http = httpRouter();
@@ -18,6 +19,13 @@ const demoStore = ctx => ({
 const demoCall = httpAction((ctx, request) => handleDemoCall(request, process.env, demoStore(ctx)));
 http.route({ path: '/api/demo-call', method: 'GET', handler: demoCall });
 http.route({ path: '/api/demo-call', method: 'POST', handler: demoCall });
+
+// Sarvam's main agent calls this mid-call (its `code_word_heard` tool) when it hears her code phrase.
+http.route({
+  path: '/api/code-word',
+  method: 'POST',
+  handler: httpAction((ctx, request) => handleCodeWord(request, args => ctx.runMutation(internal.alerts.recordCodeWord, args))),
+});
 
 // Convex Auth's public sign-in keys, at /.well-known/… where Convex looks for them.
 auth.addHttpRoutes(http);

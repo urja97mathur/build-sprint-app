@@ -91,6 +91,13 @@ button { font: inherit; cursor: pointer; }
 .session .status { margin: 0 0 10px; }
 .location { margin-bottom: 28px; color: #5C5C5C; }
 .location.error { color: #B91C1C; }
+/* The alert card: quiet and readable, never a red SOS screen. */
+.alert-card { width: 100%; margin: 0 0 28px; padding: 16px 18px; border: 1px solid #E3E3E3; border-radius: 12px; text-align: left; }
+.alert-status { display: flex; align-items: flex-start; gap: 10px; font-weight: 600; }
+.alert-status svg { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+.alert-status.error { color: #B91C1C; }
+.alert-location { margin-top: 12px; color: #5C5C5C; }
+.alert-location .text-link { min-height: 44px; padding-left: 0; }
 
 /* Trusted contacts: choosing between a contact's numbers, and the button under the list. */
 .choices { border: 0; padding: 0; margin-left: 0; margin-right: 0; }

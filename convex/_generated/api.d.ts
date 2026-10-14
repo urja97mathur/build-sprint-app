@@ -8,15 +8,18 @@
  * @module
  */
 
+import type * as alerts from "../alerts.js";
 import type * as auth from "../auth.js";
 import type * as demo from "../demo.js";
 import type * as http from "../http.js";
+import type * as lib_alerts from "../lib/alerts.js";
 import type * as lib_call from "../lib/call.js";
 import type * as lib_demo from "../lib/demo.js";
 import type * as lib_email from "../lib/email.js";
 import type * as lib_phone from "../lib/phone.js";
 import type * as lib_safety from "../lib/safety.js";
 import type * as lib_setup from "../lib/setup.js";
+import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as safety from "../safety.js";
 import type * as setup from "../setup.js";
 
@@ -27,15 +30,18 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  alerts: typeof alerts;
   auth: typeof auth;
   demo: typeof demo;
   http: typeof http;
+  "lib/alerts": typeof lib_alerts;
   "lib/call": typeof lib_call;
   "lib/demo": typeof lib_demo;
   "lib/email": typeof lib_email;
   "lib/phone": typeof lib_phone;
   "lib/safety": typeof lib_safety;
   "lib/setup": typeof lib_setup;
+  "lib/whatsapp": typeof lib_whatsapp;
   safety: typeof safety;
   setup: typeof setup;
 }>;

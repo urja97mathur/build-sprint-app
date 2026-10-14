@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CALL_PROBLEMS, DAILY_CALLS, SAFETY_OPENING, callCheck, cleanLocation, readSafetySetup, requestSafetyCall } from '../convex/lib/safety.js';
+import { CALL_PROBLEMS, DAILY_CALLS, SAFETY_OPENING, callCheck, cleanLocation, newCallKey, readSafetySetup, requestSafetyCall } from '../convex/lib/safety.js';
 
 const env = {
   SARVAM_API_KEY: 'fake-test-key', SARVAM_ORG_ID: 'org', SARVAM_WORKSPACE_ID: 'workspace',
@@ -18,7 +18,8 @@ test('the safety call needs the main agent’s settings; anything missing means 
 
 test('Sarvam calls her saved number with the main agent, opening without her name', async () => {
   let sent;
-  const outcome = await requestSafetyCall({ env, setup, phone: PHONE, fetcher: async (url, options) => {
+  const variables = { session_key: 'a'.repeat(64), code_phrase: 'sunflower' };
+  const outcome = await requestSafetyCall({ env, setup, phone: PHONE, variables, fetcher: async (url, options) => {
     sent = { url, headers: options.headers, body: JSON.parse(options.body) };
     return Response.json({ attempt_id: 'attempt' });
   } });
@@ -29,6 +30,23 @@ test('Sarvam calls her saved number with the main agent, opening without her nam
   assert.equal(sent.body.app_config.app_id, 'main-agent');
   assert.equal(sent.body.app_config.app_overrides.initial_bot_message, SAFETY_OPENING);
   assert.doesNotMatch(SAFETY_OPENING, /user_name|\{|\}/);
+  assert.deepEqual(sent.body.app_config.agent_variables, variables);
+});
+
+test('each call carries the session key and her code phrase, alongside any variables already configured', async () => {
+  let body;
+  const configured = readSafetySetup({ ...env, SARVAM_OUTBOUND_CONFIG: JSON.stringify({ app_config: { ...JSON.parse(env.SARVAM_OUTBOUND_CONFIG).app_config, agent_variables: { tone: 'warm' } } }) });
+  await requestSafetyCall({ env, setup: configured, phone: PHONE, variables: { session_key: 'k', code_phrase: 'sunflower' }, fetcher: async (_url, options) => {
+    body = JSON.parse(options.body);
+    return Response.json({ attempt_id: 'attempt' });
+  } });
+  assert.deepEqual(body.app_config.agent_variables, { tone: 'warm', session_key: 'k', code_phrase: 'sunflower' });
+});
+
+test('session keys are 64 random hex characters', () => {
+  const [a, b] = [newCallKey(), newCallKey()];
+  assert.match(a, /^[0-9a-f]{64}$/);
+  assert.notEqual(a, b);
 });
 
 test('only a confirmed request counts as requested; a clear refusal is logged by status code only', async t => {
