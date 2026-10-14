@@ -35,17 +35,24 @@ export function newCallKey() {
   return [...crypto.getRandomValues(new Uint8Array(32))].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
+// Where Sarvam reports each call's end, with the session's key and the call's ID to match it.
+export function callReport(env, callKey, callId) {
+  return env.CONVEX_SITE_URL ? { url: `${env.CONVEX_SITE_URL}/api/call-ended`, metadata: { session_key: callKey, call_id: callId } } : null;
+}
+
 // 'requested', 'refused' (Sarvam clearly said no) or 'unconfirmed' (the phone may still ring).
-// `variables` are the agent variables for this call: the session's key and her code phrase.
-export async function requestSafetyCall({ env, setup, phone, variables, fetcher = fetch, timeoutMs = 10000 }) {
+// `variables` are the agent variables for this call: the session's key and her code phrase. `opening` is what
+// Simran says first (a check-in call opens differently), and `report` is where Sarvam reports the call's end.
+export async function requestSafetyCall({ env, setup, phone, variables, opening = SAFETY_OPENING, report = null, fetcher = fetch, timeoutMs = 10000 }) {
   const url = `https://apps.sarvam.ai/api/outbounds/v1/orgs/${encodeURIComponent(env.SARVAM_ORG_ID)}/workspaces/${encodeURIComponent(env.SARVAM_WORKSPACE_ID)}/outbounds`;
   const payload = {
     app_config: {
       ...setup.app,
       agent_variables: { ...setup.app.agent_variables, ...variables },
-      app_overrides: { ...setup.app.app_overrides, initial_bot_message: SAFETY_OPENING },
+      app_overrides: { ...setup.app.app_overrides, initial_bot_message: opening },
     },
     user_config: { user_phone_number: phone },
+    ...(report && { webhook_config: report }),
   };
   try {
     const response = await fetcher(url, {

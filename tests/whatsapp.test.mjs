@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ALERT_TEMPLATE, alertParameters, indiaClock, indiaDateTime, readWhatsAppSetup, sendAlertMessage } from '../convex/lib/whatsapp.js';
+import { ALERT_TEMPLATES, alertParameters, indiaClock, indiaDateTime, readWhatsAppSetup, sendAlertMessage } from '../convex/lib/whatsapp.js';
 
 const env = { WHATSAPP_TOKEN: 'fake-whatsapp-token', WHATSAPP_PHONE_NUMBER_ID: '123456789012345' };
 const setup = readWhatsAppSetup(env);
@@ -31,9 +31,13 @@ test('the message names her, the alert time, and her last known location with wh
   assert.deepEqual(alertParameters({ name: 'Urja', alertAt }), ['Urja', '14 Oct 2026, 9:40 pm IST', 'unavailable']);
 });
 
+test('each kind of alert has its own approved template', () => {
+  assert.deepEqual(ALERT_TEMPLATES, { emergency: 'emergency_alert', check_on_her: 'check_on_her' });
+});
+
 test('the alert goes to her contact with the approved template', async () => {
   let sent;
-  const result = await sendAlertMessage({ setup, to: CONTACT, parameters: ['Urja', 'time', 'place'], fetcher: async (url, options) => {
+  const result = await sendAlertMessage({ setup, template: ALERT_TEMPLATES.emergency, to: CONTACT, parameters: ['Urja', 'time', 'place'], fetcher: async (url, options) => {
     sent = { url, headers: options.headers, body: JSON.parse(options.body) };
     return Response.json({ messages: [{ id: 'wamid.test', message_status: 'accepted' }] });
   } });
@@ -41,14 +45,14 @@ test('the alert goes to her contact with the approved template', async () => {
   assert.equal(sent.url, 'https://graph.facebook.com/v23.0/123456789012345/messages');
   assert.equal(sent.headers.Authorization, 'Bearer fake-whatsapp-token');
   assert.equal(sent.body.to, '919876543210');
-  assert.equal(sent.body.template.name, ALERT_TEMPLATE.name);
+  assert.equal(sent.body.template.name, 'emergency_alert');
   assert.deepEqual(sent.body.template.language, { code: 'en' });
   assert.deepEqual(sent.body.template.components[0].parameters.map(p => p.text), ['Urja', 'time', 'place']);
 });
 
 test('only an accepted message counts as sent; refusals keep WhatsApp’s error code, and the logs show no number or key', async t => {
   const logged = t.mock.method(console, 'error', () => {});
-  const send = fetcher => sendAlertMessage({ setup, to: CONTACT, parameters: ['a', 'b', 'c'], fetcher });
+  const send = fetcher => sendAlertMessage({ setup, template: ALERT_TEMPLATES.check_on_her, to: CONTACT, parameters: ['a', 'b', 'c'], fetcher });
   assert.deepEqual(await send(async () => Response.json({ messages: [] })), { outcome: 'unconfirmed' });
   assert.deepEqual(await send(async () => Response.json({ error: { code: 131030, message: `${CONTACT} not allowed` } }, { status: 400 })), { outcome: 'failed', error: '131030' });
   assert.deepEqual(await send(async () => new Response('', { status: 401 })), { outcome: 'failed', error: '401' });

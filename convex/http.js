@@ -5,6 +5,7 @@ import { components, internal } from './_generated/api.js';
 import { handleCall } from './lib/call.js';
 import { handleDemoCall } from './lib/demo.js';
 import { handleCodeWord } from './lib/alerts.js';
+import { handleCallEnded } from './lib/checkins.js';
 import { auth } from './auth.js';
 
 const http = httpRouter();
@@ -25,6 +26,13 @@ http.route({
   path: '/api/code-word',
   method: 'POST',
   handler: httpAction((ctx, request) => handleCodeWord(request, args => ctx.runMutation(internal.alerts.recordCodeWord, args))),
+});
+
+// Sarvam reports here when a safety call ends; a call ending while the session is on starts check-in calls.
+http.route({
+  path: '/api/call-ended',
+  method: 'POST',
+  handler: httpAction((ctx, request) => handleCallEnded(request, args => ctx.runMutation(internal.checkins.callEnded, args))),
 });
 
 // Convex Auth's public sign-in keys, at /.well-known/… where Convex looks for them.

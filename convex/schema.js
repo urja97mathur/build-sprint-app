@@ -34,21 +34,41 @@ export default defineSchema({
     safeConfirmedAt: v.optional(v.number()),
     // Private key sent to Sarvam with each call; its code-word tool sends it back. Never sent to the page.
     callKey: v.optional(v.string()),
+    // The call whose end Sarvam hasn't reported yet: one she asked for, or a check-in call.
+    openCall: v.optional(v.object({
+      id: v.string(),
+      kind: v.union(v.literal('call'), v.literal('checkin')),
+      checkInId: v.optional(v.id('checkIns')),
+      requestedAt: v.number(),
+    })),
+    missedCheckIns: v.optional(v.number()), // check-in calls missed in a row
+    checkInJob: v.optional(v.id('_scheduled_functions')), // the next check-in call, if one is waiting
   })
     .index('by_user', ['userId', 'startedAt'])
     .index('by_user_status', ['userId', 'status'])
     .index('by_callKey', ['callKey']),
 
-  // An alert during a session. One open alert per session: hearing the code word again only counts a repeat.
+  // Check-in calls: Simran calling back after a call ended while the session was still on.
+  checkIns: defineTable({
+    sessionId: v.id('safetySessions'),
+    userId: v.id('users'),
+    requestedAt: v.number(),
+    status: v.union(v.literal('calling'), v.literal('answered'), v.literal('missed')),
+    outcome: v.optional(v.string()), // Sarvam's: connected, no_answer, busy, failed; or not_placed
+    endedAt: v.optional(v.number()),
+  }).index('by_session', ['sessionId', 'requestedAt']),
+
+  // An alert during a session: an emergency (her code word) or a request to check on her (missed check-ins).
+  // At most one open alert of each reason per session; hearing the code word again only counts a repeat.
   // `location` is her latest position when the alert was raised, if any had arrived.
   alerts: defineTable({
     sessionId: v.id('safetySessions'),
     userId: v.id('users'),
-    reason: v.literal('emergency'),
-    trigger: v.literal('code_word'), // Simran heard her code phrase on the call
+    reason: v.union(v.literal('emergency'), v.literal('check_on_her')),
+    trigger: v.union(v.literal('code_word'), v.literal('missed_checkins')),
     status: v.union(v.literal('open'), v.literal('closed')),
     createdAt: v.number(),
-    repeats: v.number(),
+    repeats: v.number(), // the code word heard again while this alert was open
     location: v.optional(v.object({ latitude: v.number(), longitude: v.number(), accuracy: v.number(), measuredAt: v.number() })),
     safeConfirmedAt: v.optional(v.number()), // she tapped "I'm safe" afterwards
   }).index('by_session_status', ['sessionId', 'status']),

@@ -81,6 +81,18 @@ Settings on Production:
 
 Template `emergency_alert` (Utility, English, variable type Number), submitted 2026-10-14: header “Emergency alert from Companion”; body “Hey! An emergency alert was triggered by {{1}} during her safety call. She needs help now. Alert time: {{2}} Last known location: {{3}} Sent automatically by the Companion app.” Its validity is Meta's default 10 minutes: an undelivered message is dropped after that. Raise it to the longest allowed. An earlier `safety_alert` was submitted with empty variables and isn't used.
 
+## Check-ins (milestone 6)
+
+Each safety call (hers and check-in calls) sends Sarvam a `webhook_config`: `POST /api/call-ended` with metadata `{session_key, call_id}`. Sarvam's report says whether the call connected, wasn't answered, was busy or failed; only the key, call ID and status are read (the transcript and agent variables in it are ignored, never stored or logged). Convex (`convex/checkins.js`, rules in `convex/lib/checkins.js`) acts only on the session's latest call, once:
+
+- A call ends while the session is still on → a check-in call a minute later, opening “Hi, Simran again. Bas check kar rahi thi — sab theek hai?”.
+- A check-in call not answered (or refused by Sarvam) counts as missed; answering resets the count. Two missed in a row → a `check_on_her` alert to her first contact (not if an alert is already open), and check-ins stop.
+- At most 6 check-in calls per session; they don't count in her 10 calls a day. “Call me” and “I'm safe” call off a waiting check-in. Her code word still sends an emergency alert after a check-in alert.
+
+Sarvam main agent, Settings: turn on **Nudge quiet callers** (after 20 seconds: “Are you there?”; after 40 seconds: “Hello? Sab theek hai?”) and **Hang up after unanswered nudges**, so silence ends the call and starts check-ins. Commit a new version and set its number as `app_version`.
+
+WhatsApp template `check_on_her` (Utility, English, variable type Number): header “Check-in alert from Companion”; body “Hey! {{1}} started a safety call and isn't answering check-in calls. Please check on her. Alert time: {{2}} Last known location: {{3}} Sent automatically by the Companion app.” Same three blanks as `emergency_alert`.
+
 ## Sign-up and setup (milestone 3)
 
 Pages: the main address (`/`) is Welcome, sign-in, setup and Home; `/app.html` forwards there. The demo page links to sign-up with “Set up my safety call”. Sign-in uses Convex Auth: a six-digit code sent to her email through Resend, valid for 15 minutes, with at most 10 wrong codes an hour per email. Her account, trusted contacts (in order) and code phrase are stored in Convex (`convex/setup.js`). The code phrase is saved once, after a successful practice, and can't be changed. Practice uses the browser's own speech recognition; nothing is sent to anyone.

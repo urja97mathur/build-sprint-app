@@ -1,10 +1,12 @@
-// WhatsApp alert messages, through Meta's WhatsApp Cloud API. The `emergency_alert` template (approved in
-// WhatsApp Manager) reads: "An emergency alert was triggered by {{1}} during her safety call. She needs help now.
-// Alert time: {{2}} Last known location: {{3}} …"
+// WhatsApp alert messages, through Meta's WhatsApp Cloud API, using templates approved in WhatsApp Manager.
+// Both take the same three blanks: her name, the alert time, and her last known location.
+//   emergency_alert: "An emergency alert was triggered by {{1}} during her safety call. She needs help now. …"
+//   check_on_her:    "{{1}} started a safety call and isn't answering check-in calls. Please check on her. …"
 import { indiaDay } from './demo.js';
 
 export const GRAPH = 'https://graph.facebook.com/v23.0';
-export const ALERT_TEMPLATE = { name: 'emergency_alert', language: 'en' };
+export const ALERT_TEMPLATES = { emergency: 'emergency_alert', check_on_her: 'check_on_her' };
+const LANGUAGE = 'en';
 const IST_MS = 330 * 60 * 1000;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -40,15 +42,15 @@ export function alertParameters({ name, alertAt, location }) {
 // { outcome: 'sent', messageId } when WhatsApp accepted the message (not proof it was delivered),
 // { outcome: 'failed', error } when WhatsApp clearly refused, or { outcome: 'unconfirmed' } when we can't tell.
 // The logs get the status and WhatsApp's error code only: never the number or the message.
-export async function sendAlertMessage({ setup, to, parameters, fetcher = fetch, timeoutMs = 10000 }) {
+export async function sendAlertMessage({ setup, template, to, parameters, fetcher = fetch, timeoutMs = 10000 }) {
   const payload = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     to: to.replace(/^\+/, ''),
     type: 'template',
     template: {
-      name: ALERT_TEMPLATE.name,
-      language: { code: ALERT_TEMPLATE.language },
+      name: template,
+      language: { code: LANGUAGE },
       components: [{ type: 'body', parameters: parameters.map(text => ({ type: 'text', text })) }],
     },
   };

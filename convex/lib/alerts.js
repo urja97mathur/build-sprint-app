@@ -2,8 +2,8 @@
 // with the session's private key. The database step (../alerts.js) records the alert. Nothing is sent yet.
 
 export const CALL_KEY = /^[0-9a-f]{64}$/;
-// How long her last call could still be going: the main agent's 30-minute limit, plus ringing.
-const CALL_WINDOW_MS = 35 * 60 * 1000;
+// How long a call could still be going: the main agent's 30-minute limit, plus ringing.
+export const CALL_WINDOW_MS = 35 * 60 * 1000;
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {

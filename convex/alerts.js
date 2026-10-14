@@ -2,39 +2,56 @@ import { v } from 'convex/values';
 import { internalAction, internalMutation } from './_generated/server.js';
 import { internal } from './_generated/api.js';
 import { codeWordCounts } from './lib/alerts.js';
-import { alertParameters, readWhatsAppSetup, sendAlertMessage } from './lib/whatsapp.js';
+import { ALERT_TEMPLATES, alertParameters, readWhatsAppSetup, sendAlertMessage } from './lib/whatsapp.js';
 
-// Simran heard her code phrase on a call. One open alert per session: hearing it again only counts a repeat.
-// The alert keeps her latest position at that moment, if any arrived, and a new alert is sent to her contact.
+const openAlertsOf = (ctx, sessionId) =>
+  ctx.db.query('alerts').withIndex('by_session_status', q => q.eq('sessionId', sessionId).eq('status', 'open')).collect();
+
+// Opens an alert for the session, with her latest position at that moment if any arrived, and sends it to her
+// contact. Used by the code word (an emergency) and by missed check-ins (asking her contact to check on her).
+export async function raiseAlert(ctx, session, { reason, trigger }) {
+  const latest = await ctx.db.query('sessionLocations').withIndex('by_session', q => q.eq('sessionId', session._id)).first();
+  const alertId = await ctx.db.insert('alerts', {
+    sessionId: session._id,
+    userId: session.userId,
+    reason,
+    trigger,
+    status: 'open',
+    createdAt: Date.now(),
+    repeats: 0,
+    ...(latest && { location: { latitude: latest.latitude, longitude: latest.longitude, accuracy: latest.accuracy, measuredAt: latest.measuredAt } }),
+  });
+  await ctx.scheduler.runAfter(0, internal.alerts.sendAlert, { alertId });
+  return alertId;
+}
+
+// Missed check-ins: ask her contact to check on her, unless an emergency alert or a check-in alert is already open.
+export async function raiseCheckOnHer(ctx, session) {
+  const open = await openAlertsOf(ctx, session._id);
+  if (open.length) return false;
+  await raiseAlert(ctx, session, { reason: 'check_on_her', trigger: 'missed_checkins' });
+  return true;
+}
+
+// Simran heard her code phrase on a call. One open emergency alert per session: hearing it again only counts a
+// repeat. It's sent even if her contact was already asked to check on her.
 export const recordCodeWord = internalMutation({
   args: { callKey: v.string() },
   handler: async (ctx, { callKey }) => {
     const session = await ctx.db.query('safetySessions').withIndex('by_callKey', q => q.eq('callKey', callKey)).first();
     if (!session) return 'unknown';
-    const now = Date.now();
-    if (!codeWordCounts(session, now)) return 'expired';
-    const open = await ctx.db.query('alerts').withIndex('by_session_status', q => q.eq('sessionId', session._id).eq('status', 'open')).first();
+    if (!codeWordCounts(session, Date.now())) return 'expired';
+    const open = (await openAlertsOf(ctx, session._id)).find(alert => alert.reason === 'emergency');
     if (open) {
       await ctx.db.patch(open._id, { repeats: open.repeats + 1 });
       return 'repeat';
     }
-    const latest = await ctx.db.query('sessionLocations').withIndex('by_session', q => q.eq('sessionId', session._id)).first();
-    const alertId = await ctx.db.insert('alerts', {
-      sessionId: session._id,
-      userId: session.userId,
-      reason: 'emergency',
-      trigger: 'code_word',
-      status: 'open',
-      createdAt: now,
-      repeats: 0,
-      ...(latest && { location: { latitude: latest.latitude, longitude: latest.longitude, accuracy: latest.accuracy, measuredAt: latest.measuredAt } }),
-    });
-    await ctx.scheduler.runAfter(0, internal.alerts.sendAlert, { alertId });
+    await raiseAlert(ctx, session, { reason: 'emergency', trigger: 'code_word' });
     return 'recorded';
   },
 });
 
-// Sends the alert to her first trusted contact by WhatsApp, once. Scheduled actions never run twice,
+// Sends the alert to her first trusted contact by WhatsApp, once, with the template for its reason. Scheduled actions never run twice,
 // and the delivery record stops a second message for the same alert.
 export const sendAlert = internalAction({
   args: { alertId: v.id('alerts') },
@@ -47,7 +64,7 @@ export const sendAlert = internalAction({
       await ctx.runMutation(internal.alerts.settleDelivery, { deliveryId: delivery.deliveryId, outcome: 'failed', error: 'not_set_up' });
       return;
     }
-    const result = await sendAlertMessage({ setup, to: delivery.to, parameters: delivery.parameters });
+    const result = await sendAlertMessage({ setup, template: ALERT_TEMPLATES[delivery.reason], to: delivery.to, parameters: delivery.parameters });
     await ctx.runMutation(internal.alerts.settleDelivery, { deliveryId: delivery.deliveryId, ...result });
   },
 });
@@ -65,7 +82,7 @@ export const startDelivery = internalMutation({
     const deliveryId = await ctx.db.insert('alertDeliveries', {
       alertId, userId: alert.userId, contactId: contact._id, channel: 'whatsapp', status: 'sending', createdAt: Date.now(),
     });
-    return { deliveryId, to: contact.phone, parameters: alertParameters({ name: user?.name, alertAt: alert.createdAt, location: alert.location }) };
+    return { deliveryId, reason: alert.reason, to: contact.phone, parameters: alertParameters({ name: user?.name, alertAt: alert.createdAt, location: alert.location }) };
   },
 });
 

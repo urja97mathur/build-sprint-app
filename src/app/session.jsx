@@ -27,19 +27,32 @@ const CALL = {
 };
 const time = at => new Date(at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
-// The alert her code word sent: who it went to, whether WhatsApp accepted it (not whether it was seen),
-// and the location her contact was sent, with the same map link.
+// The first line of an alert card, for each sending state: her code word (an emergency) or missed check-ins
+// (asking her contact to check on her). "Sent" means WhatsApp accepted it, not that it was seen.
+const ALERT_LINES = {
+  emergency: (to, at) => ({
+    sending: `Sending alert${to && ` to ${to}`}…`,
+    sent: `Alert sent${to && ` to ${to}`} on WhatsApp, ${at}`,
+    failed: `Couldn’t send the alert${to && ` to ${to}`}.`,
+    unconfirmed: 'We couldn’t confirm the alert reached WhatsApp.',
+  }),
+  check_on_her: (to, at) => ({
+    sending: `Asking ${to || 'your contact'} to check on you…`,
+    sent: `Asked ${to || 'your contact'} to check on you, on WhatsApp, ${at}`,
+    failed: `Couldn’t send the check-in alert${to && ` to ${to}`}.`,
+    unconfirmed: 'We couldn’t confirm the check-in alert reached WhatsApp.',
+  }),
+};
+
+// An alert sent during the session: who it went to, whether WhatsApp accepted it, and the location her contact
+// was sent, with the same map link.
 function AlertCard({ alert }) {
-  const to = alert.contactName ? ` to ${alert.contactName}` : '';
   const status = alert.delivery?.status ?? 'sending';
-  const line =
-    status === 'sent' ? { text: `Alert sent${to} on WhatsApp, ${time(alert.delivery.sentAt)}`, sent: true }
-    : status === 'failed' ? { text: `Couldn’t send the alert${to}.`, error: true }
-    : status === 'unconfirmed' ? { text: 'We couldn’t confirm the alert reached WhatsApp.', error: true }
-    : { text: `Sending alert${to}…` };
+  const lines = ALERT_LINES[alert.reason](alert.contactName ?? '', alert.delivery?.sentAt ? time(alert.delivery.sentAt) : '');
+  const line = { text: lines[status], sent: status === 'sent', error: status === 'failed' || status === 'unconfirmed' };
   const { location } = alert;
   return (
-    <section className="alert-card" aria-label="Emergency alert">
+    <section className="alert-card" aria-label={alert.reason === 'emergency' ? 'Emergency alert' : 'Check-in alert'}>
       <p className={`alert-status${line.error ? ' error' : ''}`} role="status" aria-live="polite">
         {line.sent && <ReadyIcon />}<span>{line.text}</span>
       </p>
@@ -173,7 +186,7 @@ export function Session() {
       <Orb />
       <Status message={callView.text} error={callView.error} center />
       {sessionId && <p className={`location${location.error ? ' error' : ''}`} role="status">{location.text}</p>}
-      {session?.alert && <AlertCard alert={session.alert} />}
+      {session?.alerts?.map(alert => <AlertCard key={alert.id} alert={alert} />)}
       <div className="actions">
         <button type="button" className="primary" onClick={imSafe} disabled={!sessionId || ending}>{ending ? 'Ending…' : 'I’m safe'}</button>
         {sessionId && state !== 'requesting' && (
