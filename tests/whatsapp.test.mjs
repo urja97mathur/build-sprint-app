@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ALERT_TEMPLATES, alertParameters, indiaClock, indiaDateTime, readWhatsAppSetup, sendAlertMessage } from '../convex/lib/whatsapp.js';
+import {
+  ALERT_TEMPLATES, SAFE_UPDATE_TEMPLATE, alertParameters, indiaClock, indiaDateTime, readWhatsAppSetup, safeUpdateParameters, sendAlertMessage,
+} from '../convex/lib/whatsapp.js';
 
 const env = { WHATSAPP_TOKEN: 'fake-whatsapp-token', WHATSAPP_PHONE_NUMBER_ID: '123456789012345' };
 const setup = readWhatsAppSetup(env);
@@ -33,6 +35,12 @@ test('the message names her, the alert time, and her last known location with wh
 
 test('each kind of alert has its own approved template', () => {
   assert.deepEqual(ALERT_TEMPLATES, { emergency: 'emergency_alert', check_on_her: 'check_on_her' });
+  assert.equal(SAFE_UPDATE_TEMPLATE, 'safe_update');
+});
+
+test('the safe update names her and when she tapped “I’m safe”, in India time', () => {
+  assert.deepEqual(safeUpdateParameters({ name: ' Urja ', safeAt: at('2026-10-14T16:35:00Z') }), ['Urja', '14 Oct 2026, 10:05 pm IST']);
+  assert.deepEqual(safeUpdateParameters({ name: '', safeAt: at('2026-10-14T16:35:00Z') })[0], 'a Companion user');
 });
 
 test('the alert goes to her contact with the approved template', async () => {

@@ -89,9 +89,15 @@ Each safety call (hers and check-in calls) sends Sarvam a `webhook_config`: `POS
 - A check-in call not answered (or refused by Sarvam) counts as missed; answering resets the count. Two missed in a row → a `check_on_her` alert to her first contact (not if an alert is already open), and check-ins stop.
 - At most 6 check-in calls per session; they don't count in her 10 calls a day. “Call me” and “I'm safe” call off a waiting check-in. Her code word still sends an emergency alert after a check-in alert.
 
-Sarvam main agent, Settings: turn on **Nudge quiet callers** (after 20 seconds: “Are you there?”; after 40 seconds: “Hello? Sab theek hai?”) and **Hang up after unanswered nudges**, so silence ends the call and starts check-ins. Commit a new version and set its number as `app_version`.
+Sarvam main agent, Settings: turn on **Nudge quiet callers** (after 20 seconds: “Are you there?”; after 40 seconds: “Hello? Sab theek hai?”) and **Hang up after unanswered nudges**, so silence ends the call and starts check-ins. Both were already on in version 2 (checked by the builder 2026-10-14), with her own nudge wording.
 
 WhatsApp template `check_on_her` (Utility, English, variable type Number): header “Check-in alert from Companion”; body “Hey! {{1}} started a safety call and isn't answering check-in calls. Please check on her. Alert time: {{2}} Last known location: {{3}} Sent automatically by the Companion app.” Same three blanks as `emergency_alert`.
+
+## “I'm safe” updates (milestone 8)
+
+“I'm safe” (`safety.end`) closes the session's alerts and queues one `safe_update` WhatsApp per contact whose alert may have reached them (status sent, sending or unconfirmed; a failed alert never arrived, so that contact isn't told). It's kept in `alertDeliveries` with `kind: 'safe_update'`, never resent automatically. Home shows each update's status for an hour after the session ends (`safety.safeUpdates`).
+
+WhatsApp template `safe_update` (Utility, English, variable type Number): header “Safety update from Companion”; body “Hey! {{1}} marked herself safe at {{2}}. Location sharing has ended. Sent automatically by the Companion app.” Samples: `Urja`, `14 Oct 2026, 10:05 pm IST`.
 
 ## Sign-up and setup (milestone 3)
 

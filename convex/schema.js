@@ -73,12 +73,14 @@ export default defineSchema({
     safeConfirmedAt: v.optional(v.number()), // she tapped "I'm safe" afterwards
   }).index('by_session_status', ['sessionId', 'status']),
 
-  // Each attempt to tell a contact about an alert. 'sent' means WhatsApp accepted the message: not that it
-  // was delivered or read. 'unconfirmed' means we couldn't tell (for example, a timeout).
+  // Each message to a contact about an alert: the alert itself, or (after "I'm safe") the update that she's safe,
+  // one per contact. 'sent' means WhatsApp accepted the message: not that it was delivered or read.
+  // 'unconfirmed' means we couldn't tell (for example, a timeout).
   alertDeliveries: defineTable({
     alertId: v.id('alerts'),
     userId: v.id('users'),
     contactId: v.id('trustedContacts'),
+    kind: v.optional(v.union(v.literal('alert'), v.literal('safe_update'))), // missing means 'alert'
     channel: v.literal('whatsapp'),
     status: v.union(v.literal('sending'), v.literal('sent'), v.literal('failed'), v.literal('unconfirmed')),
     createdAt: v.number(),

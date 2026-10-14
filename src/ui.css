@@ -82,6 +82,10 @@ button { font: inherit; cursor: pointer; }
 .row-text { flex: 1; display: flex; flex-direction: column; }
 .row-detail { font-size: 14px; color: #5C5C5C; }
 .logout { align-self: center; margin-top: 20px; }
+/* After "I'm safe": one line per contact who was told she's safe. */
+.safe-update { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -6px 0 14px; color: #3D3D3D; text-align: center; }
+.safe-update svg { width: 20px; height: 20px; flex: none; }
+.safe-update.error { color: #B91C1C; }
 
 /* "Call me" on Home: the one large action. */
 .call-me { min-height: 60px; margin-bottom: 18px; font-size: 18px; }

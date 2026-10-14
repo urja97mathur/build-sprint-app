@@ -1,11 +1,17 @@
 import { v } from 'convex/values';
-import { internalAction, internalMutation } from './_generated/server.js';
+import { internalAction, internalMutation, internalQuery } from './_generated/server.js';
 import { internal } from './_generated/api.js';
 import { codeWordCounts } from './lib/alerts.js';
-import { ALERT_TEMPLATES, alertParameters, readWhatsAppSetup, sendAlertMessage } from './lib/whatsapp.js';
+import {
+  ALERT_TEMPLATES, SAFE_UPDATE_TEMPLATE, alertParameters, readWhatsAppSetup, safeUpdateParameters, sendAlertMessage,
+} from './lib/whatsapp.js';
 
 const openAlertsOf = (ctx, sessionId) =>
   ctx.db.query('alerts').withIndex('by_session_status', q => q.eq('sessionId', sessionId).eq('status', 'open')).collect();
+
+// An alert's messages: the alert itself (kind 'alert', or missing on older rows) and any safe update.
+export const deliveriesOf = (ctx, alertId) => ctx.db.query('alertDeliveries').withIndex('by_alert', q => q.eq('alertId', alertId)).collect();
+export const isAlertMessage = delivery => (delivery.kind ?? 'alert') === 'alert';
 
 // Opens an alert for the session, with her latest position at that moment if any arrived, and sends it to her
 // contact. Used by the code word (an emergency) and by missed check-ins (asking her contact to check on her).
@@ -75,14 +81,64 @@ export const startDelivery = internalMutation({
   handler: async (ctx, { alertId }) => {
     const alert = await ctx.db.get(alertId);
     if (!alert) return null;
-    if (await ctx.db.query('alertDeliveries').withIndex('by_alert', q => q.eq('alertId', alertId)).first()) return null;
+    if ((await deliveriesOf(ctx, alertId)).some(isAlertMessage)) return null;
     const contact = await ctx.db.query('trustedContacts').withIndex('by_user', q => q.eq('userId', alert.userId)).first();
     if (!contact) return null;
     const user = await ctx.db.get(alert.userId);
     const deliveryId = await ctx.db.insert('alertDeliveries', {
-      alertId, userId: alert.userId, contactId: contact._id, channel: 'whatsapp', status: 'sending', createdAt: Date.now(),
+      alertId, userId: alert.userId, contactId: contact._id, kind: 'alert', channel: 'whatsapp', status: 'sending', createdAt: Date.now(),
     });
     return { deliveryId, reason: alert.reason, to: contact.phone, parameters: alertParameters({ name: user?.name, alertAt: alert.createdAt, location: alert.location }) };
+  },
+});
+
+// "I'm safe": each contact who may have received an alert in this session (WhatsApp accepted it, it's still
+// sending, or we couldn't confirm) is told she's safe, once, however many alerts they got. A contact whose alert
+// clearly failed never got it, so they're not told either. Called from safety.end with the session's alerts.
+export async function queueSafeUpdates(ctx, alerts) {
+  const latestByContact = new Map();
+  for (const alert of alerts) {
+    for (const delivery of (await deliveriesOf(ctx, alert._id)).filter(isAlertMessage)) {
+      if (delivery.status !== 'failed') latestByContact.set(delivery.contactId, delivery);
+    }
+  }
+  for (const delivery of latestByContact.values()) {
+    const deliveryId = await ctx.db.insert('alertDeliveries', {
+      alertId: delivery.alertId, userId: delivery.userId, contactId: delivery.contactId,
+      kind: 'safe_update', channel: 'whatsapp', status: 'sending', createdAt: Date.now(),
+    });
+    await ctx.scheduler.runAfter(0, internal.alerts.sendSafeUpdate, { deliveryId });
+  }
+}
+
+// Sends one safe update by WhatsApp, with her name and the time she tapped "I'm safe". Never resent automatically.
+export const sendSafeUpdate = internalAction({
+  args: { deliveryId: v.id('alertDeliveries') },
+  handler: async (ctx, { deliveryId }) => {
+    const message = await ctx.runQuery(internal.alerts.safeUpdateToSend, { deliveryId });
+    if (!message) return;
+    const setup = readWhatsAppSetup(process.env);
+    if (!setup) {
+      console.error('WhatsApp isn’t set up, so the safe update wasn’t sent.');
+      await ctx.runMutation(internal.alerts.settleDelivery, { deliveryId, outcome: 'failed', error: 'not_set_up' });
+      return;
+    }
+    const result = await sendAlertMessage({ setup, template: SAFE_UPDATE_TEMPLATE, to: message.to, parameters: message.parameters });
+    await ctx.runMutation(internal.alerts.settleDelivery, { deliveryId, ...result });
+  },
+});
+
+export const safeUpdateToSend = internalQuery({
+  args: { deliveryId: v.id('alertDeliveries') },
+  handler: async (ctx, { deliveryId }) => {
+    const delivery = await ctx.db.get(deliveryId);
+    if (delivery?.kind !== 'safe_update' || delivery.status !== 'sending') return null;
+    const contact = await ctx.db.get(delivery.contactId);
+    if (!contact) return null;
+    const user = await ctx.db.get(delivery.userId);
+    const alert = await ctx.db.get(delivery.alertId);
+    const session = alert && await ctx.db.get(alert.sessionId);
+    return { to: contact.phone, parameters: safeUpdateParameters({ name: user?.name, safeAt: session?.safeConfirmedAt ?? delivery.createdAt }) };
   },
 });
 

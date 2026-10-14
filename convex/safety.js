@@ -4,6 +4,9 @@ import { action, internalMutation, mutation, query } from './_generated/server.j
 import { internal } from './_generated/api.js';
 import { CALL_PROBLEMS, callCheck, callReport, cleanLocation, newCallKey, readSafetySetup, requestSafetyCall } from './lib/safety.js';
 import { newCallId } from './lib/checkins.js';
+import { deliveriesOf, isAlertMessage, queueSafeUpdates } from './alerts.js';
+
+const SAFE_UPDATES_SHOWN_MS = 60 * 60 * 1000;
 
 // A safety session: "Call me" starts it (Sarvam calls her own saved number), her page shares her location,
 // and "I'm safe" ends it. Ending only the phone call does not end the session: check-in calls follow (checkins.js).
@@ -104,7 +107,7 @@ export const current = query({
 async function openAlertsOf(ctx, session) {
   const alerts = await ctx.db.query('alerts').withIndex('by_session_status', q => q.eq('sessionId', session._id).eq('status', 'open')).collect();
   return Promise.all(alerts.map(async alert => {
-    const delivery = await ctx.db.query('alertDeliveries').withIndex('by_alert', q => q.eq('alertId', alert._id)).first();
+    const delivery = (await deliveriesOf(ctx, alert._id)).find(isAlertMessage);
     const contact = delivery
       ? await ctx.db.get(delivery.contactId)
       : await ctx.db.query('trustedContacts').withIndex('by_user', q => q.eq('userId', session.userId)).first();
@@ -138,7 +141,8 @@ export const recordLocation = mutation({
   },
 });
 
-// "I'm safe": ends the session, location sharing and check-ins, and closes its open alerts as confirmed safe.
+// "I'm safe": ends the session, location sharing and check-ins, closes its open alerts as confirmed safe, and tells
+// each contact who got an alert that she's safe.
 // Ending it twice is harmless.
 export const end = mutation({
   args: { sessionId: v.id('safetySessions') },
@@ -152,5 +156,27 @@ export const end = mutation({
     await ctx.db.patch(sessionId, { status: 'ended', endedAt: now, safeConfirmedAt: now, checkInJob: undefined });
     const open = await ctx.db.query('alerts').withIndex('by_session_status', q => q.eq('sessionId', sessionId).eq('status', 'open')).collect();
     for (const alert of open) await ctx.db.patch(alert._id, { status: 'closed', safeConfirmedAt: now });
+    await queueSafeUpdates(ctx, open);
+  },
+});
+
+// Home, after "I'm safe": whether each alerted contact was told she's safe. Only for her last session, and only
+// for an hour after it ended.
+export const safeUpdates = query({
+  args: {},
+  handler: async ctx => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+    const last = await ctx.db.query('safetySessions').withIndex('by_user', q => q.eq('userId', userId)).order('desc').first();
+    if (last?.status !== 'ended' || Date.now() - last.endedAt > SAFE_UPDATES_SHOWN_MS) return [];
+    const alerts = await ctx.db.query('alerts').withIndex('by_session_status', q => q.eq('sessionId', last._id)).collect();
+    const updates = [];
+    for (const alert of alerts) {
+      for (const delivery of (await deliveriesOf(ctx, alert._id)).filter(d => d.kind === 'safe_update')) {
+        const contact = await ctx.db.get(delivery.contactId);
+        updates.push({ id: delivery._id, contactName: contact?.name ?? null, status: delivery.status });
+      }
+    }
+    return updates;
   },
 });

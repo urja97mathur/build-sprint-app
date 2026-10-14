@@ -195,6 +195,8 @@ Example for missed check-ins:
 
 #### Done
 
+Built 2026-10-14 (milestone 8) on Home, not a separate screen: “Session ended. Location sharing stopped.”, then one line per alerted contact: “Telling Asha you’re safe…” → “✓ Told Asha you’re safe” (WhatsApp accepted it), or in the error colour “Couldn’t tell Asha you’re safe.” / “We couldn’t confirm Asha was told you’re safe.” Shown for an hour after the session ends (`artifacts/session/13`–`14`). The secondary “End call” control below is not built: with a real phone call she hangs up on the phone.
+
 - Reached only when she confirms “I’m safe”.
 - Words: “Session ended. Location sharing stopped.”
 - End the call and location sharing, and send a safety update to contacts who were alerted.

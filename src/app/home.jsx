@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAction } from 'convex/react';
+import { useAction, useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../convex/_generated/api.js';
 import { startCall } from './session.jsx';
@@ -7,6 +7,25 @@ import { ChevronRight, LockIcon, PersonIcon, PlayIcon, ReadyIcon, Status, clearF
 
 const MISSING = { phone: 'Add your mobile number', contact: 'Add a trusted contact', codeword: 'Choose your code phrase' };
 const HEADLINE = 'A voice with you on your walk.';
+
+// After "I'm safe": whether each contact who got an alert was told she's safe. "Told" means WhatsApp accepted it.
+const SAFE_LINES = {
+  sending: name => ({ text: `Telling ${name} you’re safe…` }),
+  sent: name => ({ text: `Told ${name} you’re safe`, done: true }),
+  failed: name => ({ text: `Couldn’t tell ${name} you’re safe.`, error: true }),
+  unconfirmed: name => ({ text: `We couldn’t confirm ${name} was told you’re safe.`, error: true }),
+};
+function SafeUpdates() {
+  const updates = useQuery(api.safety.safeUpdates) ?? [];
+  return updates.map(update => {
+    const line = SAFE_LINES[update.status](update.contactName ?? 'your contact');
+    return (
+      <p key={update.id} className={`safe-update${line.error ? ' error' : ''}`} role="status">
+        {line.done && <ReadyIcon />}<span>{line.text}</span>
+      </p>
+    );
+  });
+}
 
 // Home after sign-in: "Call me" once setup is ready, otherwise the missing step.
 export function Home({ status }) {
@@ -37,6 +56,7 @@ export function Home({ status }) {
         <>
           <button type="button" className="primary call-me" onClick={callMe}>Call me</button>
           {flash && <Status message={flash} center />}
+          <SafeUpdates />
           <p className="ready" role="status"><ReadyIcon /> Safety setup ready</p>
         </>
       )}
