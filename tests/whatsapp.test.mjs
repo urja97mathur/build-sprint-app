@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ALERT_TEMPLATES, SAFE_UPDATE_TEMPLATE, alertParameters, indiaClock, indiaDateTime, readWhatsAppSetup, safeUpdateParameters, sendAlertMessage,
+  ALERT_TEMPLATES, SAFE_UPDATE_TEMPLATE, alertParameters, emergencyText, indiaClock, indiaDateTime, readWhatsAppSetup, safeUpdateParameters,
+  sendAlertMessage, sendEmergencyAlert,
 } from '../convex/lib/whatsapp.js';
 
 const env = { WHATSAPP_TOKEN: 'fake-whatsapp-token', WHATSAPP_PHONE_NUMBER_ID: '123456789012345' };
@@ -69,4 +70,73 @@ test('only an accepted message counts as sent; refusals keep WhatsApp’s error 
   const lines = logged.mock.calls.map(c => c.arguments[0]).join('\n');
   assert.match(lines, /131030/);
   assert.doesNotMatch(lines, /9876543210|fake-whatsapp-token|not allowed/);
+});
+
+// The code word's alert: the template first; plain text only when WhatsApp can't use the template yet.
+const PARAMS = ['Urja', '14 Oct 2026, 9:40 pm IST', 'https://maps.google.com/?q=28.61391,77.20902 (recorded at 9:38 pm IST)'];
+const recording = replies => {
+  const sent = [];
+  const fetcher = async (_url, options) => { const body = JSON.parse(options.body); sent.push(body); return replies[sent.length - 1](body); };
+  return { sent, fetcher };
+};
+
+test('when the template is approved, only the template goes out', async t => {
+  const logged = t.mock.method(console, 'log', () => {});
+  const { sent, fetcher } = recording([() => Response.json({ messages: [{ id: 'wamid.template' }] })]);
+  const result = await sendEmergencyAlert({ setup, to: CONTACT, parameters: PARAMS, fetcher });
+  assert.deepEqual(result, { outcome: 'sent', messageId: 'wamid.template', format: 'template' });
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].type, 'template');
+  assert.match(logged.mock.calls.map(c => c.arguments[0]).join('\n'), /Alert sent as template: sent/);
+});
+
+test('when the template isn’t approved (132001), the same alert goes out as plain text with the map link', async t => {
+  t.mock.method(console, 'error', () => {});
+  const logged = t.mock.method(console, 'log', () => {});
+  const { sent, fetcher } = recording([
+    () => Response.json({ error: { code: 132001, message: 'Template name does not exist in the translation' } }, { status: 404 }),
+    () => Response.json({ messages: [{ id: 'wamid.text' }] }),
+  ]);
+  const result = await sendEmergencyAlert({ setup, to: CONTACT, parameters: PARAMS, fetcher });
+  assert.deepEqual(result, { outcome: 'sent', messageId: 'wamid.text', format: 'text' });
+  assert.equal(sent.length, 2);
+  assert.equal(sent[1].type, 'text');
+  assert.equal(sent[1].to, '919876543210');
+  assert.equal(sent[1].text.preview_url, true);
+  assert.equal(sent[1].text.body, emergencyText(PARAMS));
+  assert.match(sent[1].text.body, /^Emergency alert from Companion\n/);
+  assert.match(sent[1].text.body, /An emergency alert was triggered by Urja during her safety call\. She needs help now\./);
+  assert.match(sent[1].text.body, /Last known location: https:\/\/maps\.google\.com\/\?q=28\.61391,77\.20902 \(recorded at 9:38 pm IST\)/);
+  const lines = logged.mock.calls.map(c => c.arguments[0]).join('\n');
+  assert.match(lines, /Alert sent as plain text \(template not available, code 132001\): sent/);
+  assert.doesNotMatch(lines, /9876543210|Urja/);
+});
+
+test('a paused or disabled template also falls back; if the plain text is refused too, that’s recorded', async t => {
+  t.mock.method(console, 'error', () => {});
+  t.mock.method(console, 'log', () => {});
+  for (const code of [132015, 132016]) {
+    const { fetcher } = recording([() => Response.json({ error: { code } }, { status: 400 }), () => Response.json({ messages: [{ id: 'w' }] })]);
+    assert.equal((await sendEmergencyAlert({ setup, to: CONTACT, parameters: PARAMS, fetcher })).format, 'text');
+  }
+  const { fetcher } = recording([
+    () => Response.json({ error: { code: 132001 } }, { status: 404 }),
+    () => Response.json({ error: { code: 131047 } }, { status: 400 }),
+  ]);
+  assert.deepEqual(await sendEmergencyAlert({ setup, to: CONTACT, parameters: PARAMS, fetcher }), { outcome: 'failed', error: '131047', format: 'text' });
+});
+
+test('other refusals (for example, a number not on the test list) don’t fall back to plain text', async t => {
+  t.mock.method(console, 'error', () => {});
+  t.mock.method(console, 'log', () => {});
+  for (const reply of [
+    () => Response.json({ error: { code: 131030 } }, { status: 400 }),
+    () => new Response('', { status: 503 }),
+    () => { throw new Error('timeout'); },
+  ]) {
+    const { sent, fetcher } = recording([reply]);
+    const result = await sendEmergencyAlert({ setup, to: CONTACT, parameters: PARAMS, fetcher });
+    assert.equal(result.format, 'template');
+    assert.equal(sent.length, 1);
+  }
 });

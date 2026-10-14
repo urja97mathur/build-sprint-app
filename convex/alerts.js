@@ -3,7 +3,7 @@ import { internalAction, internalMutation, internalQuery } from './_generated/se
 import { internal } from './_generated/api.js';
 import { codeWordCounts } from './lib/alerts.js';
 import {
-  ALERT_TEMPLATES, SAFE_UPDATE_TEMPLATE, alertParameters, readWhatsAppSetup, safeUpdateParameters, sendAlertMessage,
+  ALERT_TEMPLATES, SAFE_UPDATE_TEMPLATE, alertParameters, readWhatsAppSetup, safeUpdateParameters, sendAlertMessage, sendEmergencyAlert,
 } from './lib/whatsapp.js';
 
 const openAlertsOf = (ctx, sessionId) =>
@@ -70,8 +70,35 @@ export const sendAlert = internalAction({
       await ctx.runMutation(internal.alerts.settleDelivery, { deliveryId: delivery.deliveryId, outcome: 'failed', error: 'not_set_up' });
       return;
     }
-    const result = await sendAlertMessage({ setup, template: ALERT_TEMPLATES[delivery.reason], to: delivery.to, parameters: delivery.parameters });
+    // The code word's alert falls back to plain text if WhatsApp can't use the template yet; others don't.
+    const result = delivery.reason === 'emergency'
+      ? await sendEmergencyAlert({ setup, to: delivery.to, parameters: delivery.parameters })
+      : await sendAlertMessage({ setup, template: ALERT_TEMPLATES[delivery.reason], to: delivery.to, parameters: delivery.parameters });
     await ctx.runMutation(internal.alerts.settleDelivery, { deliveryId: delivery.deliveryId, ...result });
+  },
+});
+
+// For testing only, run from the command line (never from the app): sends a sample code-word alert, marked
+// "(test)", to the account's own saved number, through the same template-or-plain-text path. Records nothing.
+// Returns which format went out and WhatsApp's answer, without the number.
+export const sendTestAlert = internalAction({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.runQuery(internal.alerts.testAlertTo, { userId });
+    const setup = readWhatsAppSetup(process.env);
+    if (!setup) return { sent: false, reason: 'WhatsApp isn’t set up' };
+    if (!user?.phone) return { sent: false, reason: 'no saved number' };
+    const parameters = alertParameters({ name: `${user.name ?? 'Companion user'} (test)`, alertAt: Date.now() });
+    const { outcome, format, error } = await sendEmergencyAlert({ setup, to: user.phone, parameters });
+    return { format, outcome, ...(error && { error }) };
+  },
+});
+
+export const testAlertTo = internalQuery({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    return user && { name: user.name ?? null, phone: user.phone ?? null };
   },
 });
 
@@ -148,13 +175,15 @@ export const settleDelivery = internalMutation({
     outcome: v.union(v.literal('sent'), v.literal('failed'), v.literal('unconfirmed')),
     messageId: v.optional(v.string()),
     error: v.optional(v.string()),
+    format: v.optional(v.union(v.literal('template'), v.literal('text'))),
   },
-  handler: async (ctx, { deliveryId, outcome, messageId, error }) => {
+  handler: async (ctx, { deliveryId, outcome, messageId, error, format }) => {
     await ctx.db.patch(deliveryId, {
       status: outcome,
       ...(outcome === 'sent' && { sentAt: Date.now() }),
       ...(messageId && { messageId }),
       ...(error && { error }),
+      ...(format && { format }),
     });
   },
 });

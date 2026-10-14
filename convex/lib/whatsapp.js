@@ -49,10 +49,28 @@ export function alertParameters({ name, alertAt, location }) {
   return [who, indiaDateTime(alertAt), `${link} (recorded at ${recorded})`];
 }
 
+// WhatsApp's error codes for a template it can't use: not approved (or not found), paused, or disabled.
+export const TEMPLATE_UNAVAILABLE = new Set(['132001', '132015', '132016']);
+
+// The emergency alert as plain text: the same words as the `emergency_alert` template, header included.
+export function emergencyText([who, alertTime, location]) {
+  return [
+    'Emergency alert from Companion',
+    '',
+    'Hey!',
+    `An emergency alert was triggered by ${who} during her safety call. She needs help now.`,
+    '',
+    `Alert time: ${alertTime}`,
+    `Last known location: ${location}`,
+    '',
+    'Sent automatically by the Companion app.',
+  ].join('\n');
+}
+
 // { outcome: 'sent', messageId } when WhatsApp accepted the message (not proof it was delivered),
 // { outcome: 'failed', error } when WhatsApp clearly refused, or { outcome: 'unconfirmed' } when we can't tell.
 // The logs get the status and WhatsApp's error code only: never the number or the message.
-export async function sendAlertMessage({ setup, template, to, parameters, fetcher = fetch, timeoutMs = 10000 }) {
+export function sendAlertMessage({ setup, template, to, parameters, fetcher, timeoutMs }) {
   const payload = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
@@ -64,6 +82,36 @@ export async function sendAlertMessage({ setup, template, to, parameters, fetche
       components: [{ type: 'body', parameters: parameters.map(text => ({ type: 'text', text })) }],
     },
   };
+  return postMessage({ setup, payload, fetcher, timeoutMs });
+}
+
+// A plain-text message. WhatsApp only delivers it if the person messaged this business number in the last
+// 24 hours; otherwise it may accept it and then drop it, which this app can't see without webhooks.
+export function sendTextMessage({ setup, to, text, fetcher, timeoutMs }) {
+  const payload = {
+    messaging_product: 'whatsapp',
+    recipient_type: 'individual',
+    to: to.replace(/^\+/, ''),
+    type: 'text',
+    text: { preview_url: true, body: text },
+  };
+  return postMessage({ setup, payload, fetcher, timeoutMs });
+}
+
+// The code word's alert: the `emergency_alert` template, or, if WhatsApp can't use the template yet (for example,
+// not approved), the same alert as plain text. `format` says which one went out, and the logs say so too.
+export async function sendEmergencyAlert({ setup, to, parameters, fetcher, timeoutMs }) {
+  const result = await sendAlertMessage({ setup, template: ALERT_TEMPLATES.emergency, to, parameters, fetcher, timeoutMs });
+  if (result.outcome !== 'failed' || !TEMPLATE_UNAVAILABLE.has(result.error)) {
+    console.log(`Alert sent as template: ${result.outcome}.`);
+    return { ...result, format: 'template' };
+  }
+  const text = await sendTextMessage({ setup, to, text: emergencyText(parameters), fetcher, timeoutMs });
+  console.log(`Alert sent as plain text (template not available, code ${result.error}): ${text.outcome}.`);
+  return { ...text, format: 'text' };
+}
+
+async function postMessage({ setup, payload, fetcher = fetch, timeoutMs = 10000 }) {
   try {
     const response = await fetcher(`${GRAPH}/${setup.phoneNumberId}/messages`, {
       method: 'POST',
@@ -77,7 +125,7 @@ export async function sendAlertMessage({ setup, template, to, parameters, fetche
       return typeof messageId === 'string' && messageId ? { outcome: 'sent', messageId } : { outcome: 'unconfirmed' };
     }
     const code = Number.isInteger(result?.error?.code) ? String(result.error.code) : null;
-    console.error(`WhatsApp ${response.status >= 500 ? 'could not confirm' : 'refused'} the alert (${response.status}${code ? `, code ${code}` : ''}).`);
+    console.error(`WhatsApp ${response.status >= 500 ? 'could not confirm' : 'refused'} the ${payload.type} message (${response.status}${code ? `, code ${code}` : ''}).`);
     if (response.status >= 500) return { outcome: 'unconfirmed', ...(code && { error: code }) };
     return { outcome: 'failed', error: code ?? String(response.status) };
   } catch {

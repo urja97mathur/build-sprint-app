@@ -87,6 +87,9 @@ export default defineSchema({
     sentAt: v.optional(v.number()), // when WhatsApp accepted it
     messageId: v.optional(v.string()), // WhatsApp's ID, for its delivery reports later
     error: v.optional(v.string()), // WhatsApp's error code, or 'not_set_up'
+    // Which message went out for a code-word alert: the approved template, or plain text because WhatsApp
+    // couldn't use the template yet.
+    format: v.optional(v.union(v.literal('template'), v.literal('text'))),
   }).index('by_alert', ['alertId']),
 
   // Her latest position during a session (one row per session, replaced on each update), and how many arrived.
