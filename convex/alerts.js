@@ -79,8 +79,9 @@ export const sendAlert = internalAction({
 });
 
 // For testing only, run from the command line (never from the app): sends a sample code-word alert, marked
-// "(test)", to the account's own saved number, through the same template-or-plain-text path. Records nothing.
-// Returns which format went out and WhatsApp's answer, without the number.
+// "(test)", to the account's own saved number, through the same template-or-plain-text path, with her last
+// recorded location if she has one. Records nothing. Returns which format went out and WhatsApp's answer,
+// without the number.
 export const sendTestAlert = internalAction({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
@@ -88,7 +89,7 @@ export const sendTestAlert = internalAction({
     const setup = readWhatsAppSetup(process.env);
     if (!setup) return { sent: false, reason: 'WhatsApp isn’t set up' };
     if (!user?.phone) return { sent: false, reason: 'no saved number' };
-    const parameters = alertParameters({ name: `${user.name ?? 'Companion user'} (test)`, alertAt: Date.now() });
+    const parameters = alertParameters({ name: `${user.name ?? 'Companion user'} (test)`, alertAt: Date.now(), location: user.location });
     const { outcome, format, error } = await sendEmergencyAlert({ setup, to: user.phone, parameters });
     return { format, outcome, ...(error && { error }) };
   },
@@ -98,7 +99,11 @@ export const testAlertTo = internalQuery({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     const user = await ctx.db.get(userId);
-    return user && { name: user.name ?? null, phone: user.phone ?? null };
+    if (!user) return null;
+    const session = await ctx.db.query('safetySessions').withIndex('by_user', q => q.eq('userId', userId)).order('desc').first();
+    const latest = session && await ctx.db.query('sessionLocations').withIndex('by_session', q => q.eq('sessionId', session._id)).first();
+    const location = latest ? { latitude: latest.latitude, longitude: latest.longitude, measuredAt: latest.measuredAt } : undefined;
+    return { name: user.name ?? null, phone: user.phone ?? null, location };
   },
 });
 
