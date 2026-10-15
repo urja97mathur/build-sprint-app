@@ -9,9 +9,10 @@ import '../ui.css';
 const url = import.meta.env.VITE_CONVEX_URL ?? location.origin.replace(/\.convex\.site$/, '.convex.cloud');
 const client = new ConvexReactClient(url);
 
+// Coming back from Google, the address carries a one-time `code` that the provider exchanges to finish signing in.
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ConvexAuthProvider client={client} shouldHandleCode={false}>
+    <ConvexAuthProvider client={client}>
       <App />
     </ConvexAuthProvider>
   </StrictMode>,

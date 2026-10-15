@@ -107,8 +107,11 @@ Pages: the main address (`/`) is Welcome, sign-in, setup and Home; `/app.html` f
 
 Routing (since 2026-10-10): the static-hosting component runs in “app-owned root routing” mode. `convex/http.js` registers `/api/call-setup`, `/api/call`, `/api/demo-call` and Convex Auth's `/.well-known/…` keys, then hands every other path to the static site. The `/api/…` addresses didn't change. Convex Auth needs its keys at the site root; under `/api` its tokens were refused.
 
+**Google sign-in (2026-10-15).** Account and Log in also offer “Continue with Google” (Convex Auth's Google provider, `convex/auth.js`). Google sends her back to `SITE_URL` with a one-time code, which the app exchanges (`ConvexAuthProvider` handles the code). `convex/lib/accounts.js` decides the account: a Google sign-in with a verified email that already has an account joins it and keeps her saved name; only name and email are stored. Without the Google settings below, the button leads to Google's error page, so they must be set before deploying it. Google Cloud Console (project “Companion”): Google Auth Platform → Branding (app name, support email), Audience (External; while “Testing”, only listed test users can sign in; Publish to open it to everyone), Clients → Web application with redirect URI `https://gregarious-canary-491.convex.site/api/auth/callback/google`.
+
 Settings on Production:
 
+- `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`: the Google client's ID and secret. The secret is shown only when the client is created.
 - `JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`: Convex Auth's signing keys, generated and set on 2026-10-10. Development has its own. Never paste them anywhere.
 - `AUTH_RESEND_KEY`: the Resend API key (Resend → API Keys, “Sending access”). Without a verified domain, Resend only delivers to the Resend account's own email address.
 - `AUTH_EMAIL_FROM`: optional sender, for example `Walking companion <codes@your-domain>` once a domain is verified. Defaults to Resend's test sender.

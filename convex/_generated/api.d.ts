@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as checkins from "../checkins.js";
 import type * as demo from "../demo.js";
 import type * as http from "../http.js";
+import type * as lib_accounts from "../lib/accounts.js";
 import type * as lib_alerts from "../lib/alerts.js";
 import type * as lib_call from "../lib/call.js";
 import type * as lib_checkins from "../lib/checkins.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   checkins: typeof checkins;
   demo: typeof demo;
   http: typeof http;
+  "lib/accounts": typeof lib_accounts;
   "lib/alerts": typeof lib_alerts;
   "lib/call": typeof lib_call;
   "lib/checkins": typeof lib_checkins;

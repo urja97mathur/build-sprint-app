@@ -14,6 +14,8 @@ Status (2026-10-07): The builder chose a real phone call for the product. The pr
 8. I can confirm “I’m safe”, end the call and location sharing, and have alerted contacts receive an update. Ending only the call must keep the safety session active, with “Call me” and “I’m safe” visible. Built 2026-10-14 (builder's yes), not yet phone-tested: “I'm safe” sends the `safe_update` WhatsApp once to each contact whose alert may have reached them (sent, sending or unconfirmed; not failed), and Home shows “✓ Told Asha you're safe” or “Couldn't tell Asha you're safe.” for an hour. “I'm safe” stays tap-only (saying it to Simran is parked). Needs the `safe_update` template approved. Ending only the call already keeps the session (milestone 4), now with check-in calls (milestone 6).
 9. I can close it, reopen it, and my data is still there.
 
+Added mid-milestone at the builder's request (2026-10-15), outside the numbered milestones: **“Continue with Google”** on Account and Log in, so she doesn't type her name and email; she still adds her mobile number. Built and checked on development; waiting for the builder's Google Cloud setup before it goes live (see CALL_TEST_SETUP.md). It also lets anyone sign up without Resend's verified domain.
+
 Work on one milestone at a time, end to end. Before writing code, explain the intended outcome and plan, then wait for the builder's yes. After the builder confirms the milestone works, commit, push, and add one line to PROGRESS.md.
 
 Run the thirty-minute, no-code voice check from PRODUCT.md while building. It has not been run. The final product success measure is 3 of 5 testers starting a second safety call on a different walk within a week, without a reminder, and ending it with “I’m safe”.

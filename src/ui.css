@@ -50,6 +50,14 @@ button { font: inherit; cursor: pointer; }
 .primary:focus-visible, .secondary:focus-visible, .text-link:focus-visible, .back:focus-visible, .row:focus-visible { outline: 3px solid #202123; outline-offset: 3px; }
 .actions { display: flex; flex-direction: column; gap: 12px; }
 .form + .actions { margin-top: 12px; }
+/* "Continue with Google": Google's standard light button (white, grey outline, the four-colour G), then "or". */
+.google { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 52px; padding: 12px 20px; border: 1px solid #747775; border-radius: 12px; background: #fff; color: #1F1F1F; font-size: 16px; font-weight: 600; }
+.google svg { width: 20px; height: 20px; flex: none; }
+.google:disabled { color: #6B6B6B; cursor: default; }
+.google:focus-visible { outline: 3px solid #202123; outline-offset: 3px; }
+.title + .google { margin-top: 12px; }
+.or { display: flex; align-items: center; gap: 12px; margin: 4px 0 20px; color: #5C5C5C; font-size: 14px; }
+.or::before, .or::after { content: ''; flex: 1; border-top: 1px solid #E3E3E3; }
 .text-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 4px; border: 0; background: none; color: #202123; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; }
 .text-link:disabled { color: #6B6B6B; cursor: default; }
 .links { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 4px; }

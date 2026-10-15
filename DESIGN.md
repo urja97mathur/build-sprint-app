@@ -206,6 +206,8 @@ Built 2026-10-14 (milestone 8) on Home, not a separate screen: “Session ended.
 
 ### Account screen
 
+**Google sign-in (approved 2026-10-15).** Under the title, before the form: Google's standard light button (white, grey outline, the four-colour G) “Continue with Google”, then a thin line with “or”, then the name, email and mobile-number form as before. Returning-user login has the same button above “Your email”. Google gives her name and email; the next screen asks only for her mobile number (“Add your mobile number”, filled in from the demo if typed there), then trusted contact and code phrase as usual. If Google can't be opened: “Couldn’t open Google sign-in. Try again.” Screenshots: `artifacts/signin/01`–`02`.
+
 **For:** Creating an account after the demo, before trusted-contact setup.
 
 **Top to bottom:** Back → “Set up your safety call” → “First, a little about you.” → “Your name” field → “Email” field → “Continue” → “Already have an account? Log in”.
