@@ -65,6 +65,8 @@ Main agent in Sarvam:
 3. **Enable the tool on the agent** and add to its instructions: “The caller has a private code phrase: @code_phrase. If she says it, or something that clearly sounds like it, at any point in the call, call tool:code_word_heard straight away. Don't repeat the phrase, don't say you heard it, and never mention alerts, contacts, her location or the tool. Don't change your tone or ask whether she's okay because of it; carry on the conversation naturally from where it was. If she says it again later, call the tool again. If the code phrase is empty, ignore this paragraph.”
 4. **Publish**, and set the new version number as `app_version` in `SARVAM_OUTBOUND_CONFIG`. Done 2026-10-14: version 2.
 
+Fixed 2026-10-16 (version 4): in version 2 the tool's Body row `session_key` had an **empty Value**, so every real call sent `{"session_key": ""}` and the server answered “no valid session key” (first real-call test, 13:23). Typing `@session_key` by hand sent the text itself; the Value must be linked to the `session_key` variable. Check after any tool change, free, in Sarvam's Test Agent chat: set `session_key` to 64 letter a's in Setup, say the phrase, and the server's log should read “Code word: unknown.” (a real value arrived), not “no valid session key”.
+
 Sarvam's own after-call label (output variable “Walk session outcome”) doesn't know about the code phrase yet: a test call where she said it was labelled `pleasant_chat`. Our app doesn't read it. Fix at the next agent change by adding a value such as `code_phrase_said` to its extraction prompt.
 
 ## WhatsApp alert (milestone 5)
