@@ -3,7 +3,7 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api.js';
 import { normaliseIndianMobile } from '../../convex/lib/demo.js';
-import { Field, PhoneField, Status, TopBar, fieldOf, go, problem, withTimeout } from './ui.jsx';
+import { Field, Orb, PhoneField, Status, TopBar, fieldOf, go, problem, withTimeout } from './ui.jsx';
 
 // The number she typed on the demo page in this browser, if any (see src/demo.js).
 function demoPhone() {
@@ -69,26 +69,36 @@ export function Welcome() {
   );
 }
 
+// Sign-up and log in share one layout, spaced like the builder's reference (2026-10-16): a small orb, the title and
+// a line under it, "Continue with Google", and the link to the other screen, centred on the screen.
+function SignInScreen({ back, title, subtitle, question, action, to }) {
+  return (
+    <main className="ui signin">
+      <TopBar {...back} />
+      <div className="signin-body">
+        <Orb />
+        <h1 className="title">{title}</h1>
+        <p className="subtitle">{subtitle}</p>
+        <GoogleSignIn />
+        <p className="signin-switch">
+          {question} <button type="button" className="text-link" onClick={() => go(to)}>{action}</button>
+        </p>
+      </div>
+    </main>
+  );
+}
+
 export function Account() {
   return (
-    <main className="ui">
-      <TopBar href="/demo.html" />
-      <h1 className="title center">Set up your safety call</h1>
-      <GoogleSignIn />
-      <Switch question="Already have an account?" action="Log in" to="login" />
-    </main>
+    <SignInScreen back={{ href: '/demo.html' }} title="Set up your safety call" subtitle="Sign in with Google to start your safety calls."
+      question="Already have an account?" action="Log in" to="login" />
   );
 }
 
 export function Login() {
   return (
-    <main className="ui">
-      <TopBar to="" />
-      <h1 className="title center">Welcome back</h1>
-      <p className="subtitle center">Log in to your safety call.</p>
-      <GoogleSignIn />
-      <Switch question="New here?" action="Create account" to="account" />
-    </main>
+    <SignInScreen back={{ to: '' }} title="Welcome back" subtitle="Log in to your safety call."
+      question="New here?" action="Create account" to="account" />
   );
 }
 

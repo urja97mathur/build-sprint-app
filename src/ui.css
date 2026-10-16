@@ -56,6 +56,13 @@ button { font: inherit; cursor: pointer; }
 .google:disabled { color: #6B6B6B; cursor: default; }
 .google:focus-visible { outline: 3px solid #202123; outline-offset: 3px; }
 .title + .google { margin-top: 12px; }
+/* Sign-up and log in: one block centred on the screen, spaced like the builder's reference. */
+.signin-body { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; padding-bottom: 48px; }
+.signin-body .orb { width: 80px; margin: 0 auto 32px; }
+.signin-body .title { margin: 0 0 12px; }
+.signin-body .subtitle { margin-bottom: 40px; }
+.signin-switch { margin-top: 28px; color: #5C5C5C; }
+.signin-switch .text-link { min-height: 44px; padding: 8px 2px; vertical-align: baseline; }
 .text-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 4px; border: 0; background: none; color: #202123; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; }
 .text-link:disabled { color: #6B6B6B; cursor: default; }
 
