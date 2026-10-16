@@ -3,7 +3,7 @@ import { useAction, useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../convex/_generated/api.js';
 import { startCall } from './session.jsx';
-import { ChevronRight, LockIcon, PersonIcon, PlayIcon, ReadyIcon, Status, clearFlash, go, readFlash } from './ui.jsx';
+import { ChevronRight, LockIcon, PersonIcon, PhoneIcon, PlayIcon, ReadyIcon, Status, clearFlash, go, readFlash } from './ui.jsx';
 
 const MISSING = { phone: 'Add your mobile number', contact: 'Add a trusted contact', codeword: 'Choose your code phrase' };
 const HEADLINE = 'A voice with you on your walk.';
@@ -54,7 +54,10 @@ export function Home({ status }) {
         </div>
       ) : (
         <>
-          <button type="button" className="primary call-me" onClick={callMe}>Call me</button>
+          <div className="call-ring">
+            <button type="button" className="call-me" onClick={callMe}><PhoneIcon /><span>Call me</span></button>
+          </div>
+          <p className="call-caption">Feel unsafe? We’ll call you right now.</p>
           {flash && <Status message={flash} center />}
           <SafeUpdates />
           <p className="ready" role="status"><ReadyIcon /> Safety setup ready</p>

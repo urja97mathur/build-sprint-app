@@ -93,8 +93,14 @@ button { font: inherit; cursor: pointer; }
 .safe-update svg { width: 20px; height: 20px; flex: none; }
 .safe-update.error { color: #B91C1C; }
 
-/* "Call me" on Home: the one large action. */
-.call-me { min-height: 60px; margin-bottom: 18px; font-size: 18px; }
+/* "Call me" on Home: the one large action, a purple-to-pink circle with a faint ring and soft glow (builder's
+   reference, 2026-10-16). The pink is deeper than the reference so the white label keeps at least 3:1 contrast. */
+.call-ring { display: grid; place-items: center; width: 232px; height: 232px; margin: 4px auto 16px; border: 1px solid rgba(123, 92, 230, .18); border-radius: 50%; }
+.call-me { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 200px; height: 200px; padding: 0; border: 0; border-radius: 50%; background: linear-gradient(135deg, #7B5CE6 0%, #C66FB5 55%, #D9657F 100%); color: #fff; font-size: 26px; font-weight: 700; box-shadow: 0 12px 40px rgba(170, 100, 200, .35); }
+.call-me svg { width: 40px; height: 40px; }
+.call-me:focus-visible { outline: 3px solid #202123; outline-offset: 6px; }
+.call-me:active { transform: scale(.98); }
+.call-caption { margin-bottom: 18px; text-align: center; color: #5C5C5C; }
 
 /* Safety session: orb, the call's status, whether location is reaching Convex, "I'm safe". */
 .session .orb { margin-top: 0; }

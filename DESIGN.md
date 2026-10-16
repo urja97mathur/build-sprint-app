@@ -474,7 +474,7 @@ For: Starting a real safety call after setup and accessing safety settings.
 Top to bottom:
 
 1. “A voice with you on your walk.”
-2. One large “Call me” button.
+2. One large “Call me” button. Since 2026-10-16 (builder's reference): a 200 px circle with a purple-to-pink gradient (#7B5CE6 → #C66FB5 → #D9657F, deeper pink than the reference so the white label keeps 3:1), a white phone icon above a bold white “Call me”, a faint ring and soft glow around it, on the white page. Under it: “Feel unsafe? We’ll call you right now.” (`artifacts/session/15`).
 3. “Safety setup ready” when setup is complete; otherwise show the specific missing item.
 4. Small links: “Trusted contacts”, “Code word”, and “Try demo”.
 

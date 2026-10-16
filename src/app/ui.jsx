@@ -51,6 +51,12 @@ export const ChevronRight = () => <Icon><path d="M9 18l6-6-6-6" /></Icon>;
 export const PersonIcon = () => <Icon><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></Icon>;
 export const LockIcon = () => <Icon><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Icon>;
 export const PlayIcon = () => <Icon><circle cx="12" cy="12" r="9" /><path d="M10 8.8v6.4l5.2-3.2z" /></Icon>;
+// A filled phone handset, for "Call me".
+export const PhoneIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z" />
+  </svg>
+);
 export const ReadyIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <circle cx="12" cy="12" r="11" fill="#16A34A" />
