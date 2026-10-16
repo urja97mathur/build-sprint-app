@@ -91,8 +91,8 @@ Clearly label the demo: **“Demo only. No contacts are alerted or location shar
 2. I can try a clearly labelled demo before signing up, without sending alerts or sharing my location. (Done 2026-10-09: one real demo call per number, under a minute.)
 3. I can create an account, save one trusted contact and a code word, and add more contacts later. (Done 2026-10-10: email-code sign-in, trusted contacts, and a code phrase chosen once and practised in the browser. Codes reach only the builder's email until a domain is verified.)
 4. I can start a safety call, keep talking while I walk, and share my location for that session. (Done 2026-10-13 for the call, on Android, including with the screen locked. Location stopped reaching Convex once the call came in; not fixed yet. iPhone in a later version.)
-5. I can say my code word and have my trusted contact receive an emergency alert with my latest location, without the AI announcing it aloud.
+5. I can say my code word and have my trusted contact receive an emergency alert with my latest location, without the AI announcing it aloud. (Done 2026-10-16 on Android: a WhatsApp alert to her first trusted contact through Meta’s test number. Next contact and “I’m responding” are parked.)
 6. I can miss repeated check-ins and have my contact receive a check-on-me alert; stopping alone does not send an emergency alert.
 7. I can have the app try my next saved contact if the first does not respond, and see whether a contact has acknowledged the alert.
-8. I can confirm “I’m safe”, end the call and location sharing, and have alerted contacts receive an update.
+8. I can confirm “I’m safe”, end the call and location sharing, and have alerted contacts receive an update. (Done 2026-10-16 on Android: a WhatsApp safety update to each contact who got an alert.)
 9. I can close it, reopen it, and my data is still there.
