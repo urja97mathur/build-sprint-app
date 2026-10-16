@@ -18,7 +18,6 @@ import type * as lib_alerts from "../lib/alerts.js";
 import type * as lib_call from "../lib/call.js";
 import type * as lib_checkins from "../lib/checkins.js";
 import type * as lib_demo from "../lib/demo.js";
-import type * as lib_email from "../lib/email.js";
 import type * as lib_phone from "../lib/phone.js";
 import type * as lib_safety from "../lib/safety.js";
 import type * as lib_setup from "../lib/setup.js";
@@ -43,7 +42,6 @@ declare const fullApi: ApiFromModules<{
   "lib/call": typeof lib_call;
   "lib/checkins": typeof lib_checkins;
   "lib/demo": typeof lib_demo;
-  "lib/email": typeof lib_email;
   "lib/phone": typeof lib_phone;
   "lib/safety": typeof lib_safety;
   "lib/setup": typeof lib_setup;

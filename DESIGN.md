@@ -206,7 +206,7 @@ Built 2026-10-14 (milestone 8) on Home, not a separate screen: “Session ended.
 
 ### Account screen
 
-**Google sign-in (approved 2026-10-15).** Under the title, before the form: Google's standard light button (white, grey outline, the four-colour G) “Continue with Google”, then a thin line with “or”, then the name, email and mobile-number form as before. Returning-user login has the same button above “Your email”. Google gives her name and email; the next screen asks only for her mobile number (“Add your mobile number”, filled in from the demo if typed there), then trusted contact and code phrase as usual. If Google can't be opened: “Couldn’t open Google sign-in. Try again.” Screenshots: `artifacts/signin/01`–`02`.
+**Google only (decided 2026-10-16; this replaces the email form below and the Email verification screen, kept for reference).** Top to bottom: Back → “Set up your safety call” → Google's standard light button (white, grey outline, the four-colour G) “Continue with Google” → “Already have an account? Log in”. Returning-user login: “Welcome back” → “Log in to your safety call.” → the same button → “New here? Create account”. Google always shows “Choose an account”. Google gives her name and email; the next screen asks only for her mobile number (“Add your mobile number”, filled in from the demo if typed there), then goes straight to trusted contact and code phrase. If Google can't be opened: “Couldn’t open Google sign-in. Try again.” Screenshots: `artifacts/signin/03`–`05` (the 2026-10-15 version with the email form below an “or” line: `01`–`02`).
 
 **For:** Creating an account after the demo, before trusted-contact setup.
 
@@ -243,6 +243,8 @@ Use the calm, spacious style. Do not ask for city, a trusted contact, or a code 
 ```
 
 ### Email verification
+
+**Removed 2026-10-16:** sign-in is Google only; email codes are parked (PLAN.md). Kept for reference.
 
 **Approved method:** Send a code to her email. She enters the code in the app to verify her email.
 
