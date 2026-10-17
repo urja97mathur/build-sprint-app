@@ -92,10 +92,12 @@ export const current = query({
     const session = await activeSessionOf(ctx, userId);
     if (!session) return null;
     const location = await ctx.db.query('sessionLocations').withIndex('by_session', q => q.eq('sessionId', session._id)).first();
+    const user = await ctx.db.get(userId);
     return {
       id: session._id,
       startedAt: session.startedAt,
       callStatus: session.callStatus,
+      phone: user?.phone ?? null, // her own number, for "Simran will ring …"
       location: location ? { receivedAt: location.receivedAt, measuredAt: location.measuredAt, updates: location.updates } : null,
       alerts: await openAlertsOf(ctx, session),
     };

@@ -42,102 +42,92 @@ export function withTimeout(promise, ms = 10000) {
 export const problem = (error, fallback) => (error instanceof ConvexError && error.data?.message) || fallback;
 export const fieldOf = error => (error instanceof ConvexError && error.data?.field) || null;
 
-// Line icons, drawn on a 24-unit grid in the text colour.
-const Icon = ({ children }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{children}</svg>
+// "+919876543210" → "+91 98765 43210" for reading; other numbers are shown as saved.
+export const showPhone = phone => (/^\+91\d{10}$/.test(phone ?? '') ? `+91 ${phone.slice(3, 8)} ${phone.slice(8)}` : phone ?? '');
+// The 10 digits after +91, spaced like the field shows them: "98765 43210".
+export const nationalPart = phone => (/^\+91\d{10}$/.test(phone ?? '') ? `${phone.slice(3, 8)} ${phone.slice(8)}` : '');
+export const firstName = name => String(name ?? '').trim().split(/\s+/)[0] || '';
+
+// Line icons on a 24-unit grid, in the text colour (the canvas's icon set).
+const Icon = ({ children, width = 2 }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{children}</svg>
 );
 export const ChevronLeft = () => <Icon><path d="M15 18l-6-6 6-6" /></Icon>;
 export const ChevronRight = () => <Icon><path d="M9 18l6-6-6-6" /></Icon>;
-export const PersonIcon = () => <Icon><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></Icon>;
-export const LockIcon = () => <Icon><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Icon>;
-export const PlayIcon = () => <Icon><circle cx="12" cy="12" r="9" /><path d="M10 8.8v6.4l5.2-3.2z" /></Icon>;
-// A filled phone handset, for "Call me".
-export const PhoneIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path fill="currentColor" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z" />
-  </svg>
-);
-export const ReadyIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <circle cx="12" cy="12" r="11" fill="#1E8A4C" />
-    <path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+export const PhoneIcon = () => <Icon width={1.8}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" /></Icon>;
+export const CheckIcon = () => <Icon width={2.2}><path d="M5 12.5l4.5 4.5L19 7.5" /></Icon>;
+export const AlertIcon = () => <Icon><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 16.5v.01" /></Icon>;
+export const InfoIcon = () => <Icon><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.5v.01" /></Icon>;
+export const ClockIcon = () => <Icon><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Icon>;
+export const WarningIcon = () => <Icon><path d="M12 8v5M12 16.5v.01" /><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /></Icon>;
+export const PinIcon = () => <Icon><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></Icon>;
+export const PinOffIcon = () => <Icon><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><path d="M4 4l16 16" /></Icon>;
+export const PauseIcon = () => <Icon><path d="M9 5v14M15 5v14" /></Icon>;
+export const ChatIcon = () => <Icon><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></Icon>;
+export const MicIcon = () => <Icon width={1.8}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></Icon>;
+export const WaveIcon = () => <Icon><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4" /></Icon>;
+export const PersonIcon = () => <Icon width={1.8}><circle cx="12" cy="9" r="3.5" /><path d="M5 20c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5" /></Icon>;
+export const PencilIcon = () => <Icon width={1.8}><path d="M4 20h4L19 9l-4-4L4 16z" /></Icon>;
+export const PlusIcon = () => <Icon><path d="M12 5v14M5 12h14" /></Icon>;
+export const LockIcon = () => <Icon width={1.8}><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></Icon>;
+export const Spinner = ({ light = false }) => (
+  <svg className="spin" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="9" stroke={light ? '#FFFFFF' : '#EEE3E8'} strokeOpacity={light ? 0.35 : 1} strokeWidth="3" />
+    <path d="M12 3a9 9 0 0 1 9 9" stroke={light ? '#FFFFFF' : '#7A4CC2'} strokeWidth="3" strokeLinecap="round" />
   </svg>
 );
 
-// The `<` back control at the top left, with an optional label in the middle.
-export function TopBar({ to, href, label }) {
-  const back = href
-    ? <a className="back" href={href} aria-label="Back"><ChevronLeft /></a>
-    : to !== undefined && <button type="button" className="back" aria-label="Back" onClick={() => go(to)}><ChevronLeft /></button>;
-  return <header className="topbar">{back}{label && <p className="eyebrow">{label}</p>}</header>;
-}
-
-export function Field({ id, label, error, hint, hiddenLabel = false, ...input }) {
-  const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+// The A · Voice logo: a dot with voice waves, white on the call gradient.
+export function Logo({ size = 40, label }) {
   return (
-    <div className="field">
-      <label className={hiddenLabel ? 'visually-hidden' : 'label'} htmlFor={id}>{label}</label>
-      <input id={id} className="input" aria-invalid={Boolean(error)} aria-describedby={describedBy} {...input} />
-      {hint && <p id={`${id}-hint`} className="hint">{hint}</p>}
-      {error && <p id={`${id}-error`} className="field-error">{error}</p>}
+    <div className={`logo s${size}`} {...(label ? { role: 'img', 'aria-label': label } : {})}>
+      <svg viewBox="0 0 120 120" fill="none" aria-hidden="true" focusable="false">
+        <circle cx="46" cy="60" r="12" fill="#FFFFFF" />
+        <path d="M60.1 43.1A22 22 0 0 1 60.1 76.9" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" />
+        <path d="M69.1 32.4A36 36 0 0 1 69.1 87.6" stroke="#FFFFFF" strokeOpacity="0.6" strokeWidth="10" strokeLinecap="round" />
+      </svg>
     </div>
   );
 }
 
-// Her Indian mobile number, with a fixed +91 in front (the same field as the demo page).
-export function PhoneField({ id, label, error, hint, ...input }) {
-  const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+// The `<` back control: a link (`href`) or a screen in this app (`to`).
+export function Back({ to, href, label = 'Back', disabled = false }) {
+  if (href) return <a className="icon-btn" href={href} aria-label={label}><ChevronLeft /></a>;
+  return <button type="button" className="icon-btn" aria-label={label} disabled={disabled} onClick={() => go(to)}><ChevronLeft /></button>;
+}
+// The row at the top of a screen: back on the left (or nothing), something on the right.
+export function Top({ back, right }) {
+  return <div className="top">{back ?? <span />}{right}</div>;
+}
+// Setup progress: step 1 fills the first half, step 2 both.
+export const StepBar = ({ step }) => (
+  <div className="bar" role="img" aria-label={`Step ${step} of 2`}><span className="on" /><span className={step === 2 ? 'on' : ''} /></div>
+);
+
+// A labelled field. `prefix` puts a fixed "+91" and a divider in front; `error` shows under it in red.
+export function Field({ id, label, error, hint, prefix, disabled, ...input }) {
+  const describedBy = [hint && !error && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
   return (
-    <div className="field">
-      <label className="label" htmlFor={id}>{label}</label>
-      <div className="phone-input">
-        <span>+91</span>
-        <input id={id} type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={16} placeholder="98765 43210"
-          aria-invalid={Boolean(error)} aria-describedby={describedBy} {...input} />
+    <div className="fl">
+      <label className="lbl" htmlFor={id}>{label}</label>
+      <div className={`field${error ? ' bad' : ''}${disabled ? ' off' : ''}`}>
+        {prefix && <><span>{prefix}</span><span className="sep" /></>}
+        <input id={id} aria-invalid={Boolean(error)} aria-describedby={describedBy} disabled={disabled} {...input} />
       </div>
-      {hint && <p id={`${id}-hint`} className="hint">{hint}</p>}
-      {error && <p id={`${id}-error`} className="field-error">{error}</p>}
+      {error
+        ? <p id={`${id}-error`} className="errt" role="alert"><AlertIcon />{error}</p>
+        : hint && <p id={`${id}-hint`} className="hint">{hint}</p>}
     </div>
   );
 }
 
-export function Status({ message, error = false, center = false }) {
-  return <p className={`status${error ? ' error' : ''}${center ? ' center' : ''}`} role="status" aria-live="polite">{message}</p>;
-}
-
-// The same soft swirl orb as the call and demo pages.
-export function Orb() {
+// A note: info (blush), bad (red) or ok (green), with its icon.
+const NOTE_ICONS = { info: InfoIcon, bad: AlertIcon, ok: CheckIcon };
+export function Note({ kind = 'info', icon, children, live = true }) {
+  const Glyph = icon ?? NOTE_ICONS[kind];
   return (
-    <svg className="orb" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
-      <defs>
-        <radialGradient id="orb-body" cx="45%" cy="42%" r="62%">
-          <stop offset="0" stopColor="#DCC8EE" />
-          <stop offset="1" stopColor="#F6EAF1" />
-        </radialGradient>
-        <radialGradient id="orb-fade">
-          <stop offset=".93" stopColor="#fff" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </radialGradient>
-        <mask id="orb-edge"><circle cx="100" cy="100" r="100" fill="url(#orb-fade)" /></mask>
-        <filter id="orb-wide" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16" /></filter>
-        <filter id="orb-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9" /></filter>
-      </defs>
-      <g mask="url(#orb-edge)">
-        <circle cx="100" cy="100" r="100" fill="url(#orb-body)" />
-        <g className="orb-swirl">
-          <g filter="url(#orb-wide)">
-            <ellipse cx="114" cy="86" rx="46" ry="36" fill="#8F5FCB" opacity=".9" />
-            <ellipse cx="60" cy="124" rx="40" ry="34" fill="#C2638F" opacity=".95" />
-          </g>
-          <g fill="none" stroke="#FFF6FA" strokeLinecap="round" filter="url(#orb-soft)" opacity=".75">
-            <path d="M46 52 C 84 22, 150 34, 160 80" strokeWidth="22" />
-            <path d="M98 108 C 80 140, 104 172, 156 150" strokeWidth="24" />
-          </g>
-        </g>
-      </g>
-    </svg>
+    <div className={`note n-${kind}`} role={live ? (kind === 'bad' ? 'alert' : 'status') : undefined}>
+      <Glyph /><span>{children}</span>
+    </div>
   );
 }
-
-// "+919876543210" → "+91 98765 43210" for reading; other numbers are shown as saved.
-export const showPhone = phone => (/^\+91\d{10}$/.test(phone) ? `+91 ${phone.slice(3, 8)} ${phone.slice(8)}` : phone);

@@ -1,20 +1,28 @@
-/* Public pages (Welcome, demo, sign-in, setup, Home, session). Colours and font from the builder's canvas
-   "Safety Call — Minimal Redesign" (palette board, 2026-10-17). The private call page keeps style.css. */
+/* Every public screen (Welcome, demo, sign-in, setup, Home, session, settings), built from the builder's canvas
+   “Safety Call — Minimal Redesign” (2026-10-18): palette, Geist, 56 px rounded buttons and fields, big
+   left-aligned titles, actions at the bottom. The private call page keeps style.css. */
 :root {
   --ink: #2A1630;          /* plum ink: text */
   --muted: #6E5F6B;        /* mauve grey: secondary text, 5.6:1 on the ground */
-  --placeholder: #7A6A77;  /* example text in fields, 5:1 on white */
-  --field-border: #9A8794; /* deeper than the canvas's #E6D6DF so fields stay visible (3.3:1) */
-  --outline: #E6D6DF;      /* outline of white buttons */
+  --placeholder: #7A6A77;  /* example text in fields */
+  --outline: #E6D6DF;      /* white buttons and fields */
   --line: #EEE3E8;         /* dividers and card borders */
-  --tint: #F3E6EE;         /* blush tint: rings, fills */
+  --tint: #F3E6EE;         /* blush tint: rings, fills, info notes */
   --ground: #FBF7F8;       /* blush white: page background */
   --surface: #FFFFFF;
   --from: #7A4CC2;         /* call gradient: white text keeps 4.8:1 or more across it */
   --to: #B84D78;
   --gradient: linear-gradient(135deg, var(--from), var(--to));
   --safe: #1E8A4C;         /* safe green: status only */
-  --error: #B91C1C;
+  --ready-text: #1E6B3F;
+  --ok-bg: #E6F4EC;
+  --ok-text: #1E5A36;
+  --bad-bg: #FBE9EA;
+  --bad-text: #8C1D18;
+  --bad: #B3261E;
+  --pause-bg: #FBF0DC;
+  --pause-text: #7A4A00;
+  --warn-text: #8A4B00;
   --disabled: #EFE3EA;
   --disabled-text: #8A7A86;
   font-family: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -24,124 +32,181 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--ground); }
-p { margin: 0; font-size: 16px; line-height: 1.5; }
-button { font: inherit; cursor: pointer; }
-.ui { min-height: 100svh; max-width: 440px; margin: 0 auto; padding: 8px 24px 32px; display: flex; flex-direction: column; }
-.ui.middle { justify-content: center; }
-.center { text-align: center; }
-
-/* Top bar: a back chevron on the left and, on the demo page, its label in the middle. */
-.topbar { position: relative; display: flex; align-items: center; justify-content: center; min-height: 48px; margin: 0 -12px 8px; }
-.back { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 12px; background: none; color: inherit; }
-.back svg { width: 24px; height: 24px; }
-.eyebrow { font-size: 14px; font-weight: 600; letter-spacing: .08em; }
-
-.title { margin: 12px 0; font-size: 28px; line-height: 1.2; font-weight: 600; letter-spacing: -.02em; text-wrap: balance; }
-.title + .form { margin-top: 20px; }
-.subtitle { margin-bottom: 28px; color: var(--muted); text-wrap: balance; }
-.subtitle + .rows { margin-top: 0; }
-.step { margin-top: 40px; font-size: 14px; color: var(--muted); }
-.note { margin-top: 14px; font-size: 14px; color: var(--muted); }
-.warning { margin: -4px 0 20px; font-weight: 600; }
-
-/* Fields: rectangles with slightly rounded corners and example text inside. */
-.form { width: 100%; }
-.field { margin-bottom: 18px; text-align: left; }
-.label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--ink); }
-.input, .phone-input { display: flex; width: 100%; min-height: 52px; border: 1px solid var(--field-border); border-radius: 8px; background: var(--surface); color: inherit; font: inherit; font-size: 16px; }
-.input { padding: 12px 16px; }
-.input::placeholder, .phone-input input::placeholder { color: var(--placeholder); }
-.input:focus, .phone-input:focus-within { outline: 2px solid var(--ink); outline-offset: 0; border-color: var(--ink); }
-.input:disabled { color: var(--muted); background: var(--disabled); }
-.input[aria-invalid="true"] { border-color: var(--error); }
-.phone-input { align-items: center; gap: 8px; padding: 0 16px; }
-.phone-input input { flex: 1; min-width: 0; padding: 12px 0; border: 0; outline: none; background: transparent; color: inherit; font: inherit; font-size: 16px; }
-.phone-input input:disabled { color: var(--muted); }
-.hint { margin-top: 6px; font-size: 14px; color: var(--muted); }
-.field-error { margin-top: 6px; color: var(--error); }
+p, h1, h2 { margin: 0; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--ink); }
+[hidden] { display: none !important; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* Buttons: the call gradient with white text; a second choice is white with a soft outline. */
-.primary, .secondary { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 14px 20px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; }
-.primary { border: 0; background: var(--gradient); color: #fff; }
-.primary:disabled { background: var(--disabled); color: var(--disabled-text); cursor: default; }
-.secondary { border: 1px solid var(--outline); background: var(--surface); color: var(--ink); }
-.secondary:disabled { color: var(--disabled-text); cursor: default; }
-.primary:focus-visible, .secondary:focus-visible, .text-link:focus-visible, .back:focus-visible, .row:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-.actions { display: flex; flex-direction: column; gap: 12px; }
-.form + .actions { margin-top: 12px; }
-/* "Continue with Google", the only way to sign in: a white button with Google's four-colour G. */
-.google { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 52px; padding: 12px 20px; border: 1px solid var(--outline); border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 16px; font-weight: 600; }
-.google svg { width: 20px; height: 20px; flex: none; }
-.google:disabled { color: var(--disabled-text); cursor: default; }
-.google:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-.title + .google { margin-top: 12px; }
-/* Sign-up and log in: one block centred on the screen, spaced like the builder's reference. */
-.signin-body { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; padding-bottom: 48px; }
-.signin-body .orb { width: 80px; margin: 0 auto 32px; }
-.signin-body .title { margin: 0 0 12px; }
-.signin-body .subtitle { margin-bottom: 40px; }
-.signin-switch { margin-top: 28px; color: var(--muted); }
-.signin-switch .text-link { min-height: 44px; padding: 8px 2px; vertical-align: baseline; }
-.text-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 4px; border: 0; background: none; color: var(--ink); font-size: 16px; text-decoration: underline; text-underline-offset: 3px; }
-.text-link:disabled { color: var(--disabled-text); cursor: default; }
+/* One screen: a phone-width column with the actions at the bottom. */
+.screen { min-height: 100svh; max-width: 440px; margin: 0 auto; padding: 48px 24px 40px; display: flex; flex-direction: column; gap: 16px; }
+.screen.tight { padding-bottom: 32px; }
+.top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -10px; padding: 0; border: 0; border-radius: 12px; background: transparent; color: var(--ink); text-decoration: none; }
+.icon-btn svg { width: 22px; height: 22px; }
+.mid { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.grow { flex: 1; }
+.center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
 
-.status { min-height: 24px; margin: 14px 0; }
-.status.error { color: var(--error); }
-.switch { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); text-align: center; }
-.switch p { font-size: 14px; color: var(--muted); }
+/* Words. */
+.h-xl { font-size: 40px; line-height: 1.08; font-weight: 600; letter-spacing: -.03em; }
+.h-lg { font-size: 34px; line-height: 1.1; font-weight: 600; letter-spacing: -.03em; }
+.h-md { font-size: 32px; line-height: 1.1; font-weight: 600; letter-spacing: -.03em; }
+.h-sm { font-size: 28px; line-height: 1.15; font-weight: 600; letter-spacing: -.02em; }
+.st { font-size: 22px; line-height: 1.25; font-weight: 600; letter-spacing: -.01em; }
+.sub { font-size: 17px; line-height: 1.45; color: var(--muted); }
+.step { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.fine { text-align: center; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.link { margin-top: 12px; text-align: center; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.text-link { display: inline-block; margin: -12px 0; padding: 12px 2px; border: 0; background: none; color: var(--ink); font-size: inherit; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
 
-/* The soft swirl orb, in the palette's lavender and blush (2026-10-17). It turns slowly and stays still when motion is reduced. */
-.orb { display: block; width: min(52vw, 220px); height: auto; aspect-ratio: 1; margin: 20px auto 28px; }
-.orb-swirl { transform-box: view-box; transform-origin: 50% 50%; animation: orb-turn 40s linear infinite; }
-@keyframes orb-turn { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .orb-swirl { animation: none; } }
+/* Buttons: the call gradient for the main action, white with a soft outline for a second choice, plum for
+   “I'm safe”. */
+.btn, .btn2, .btn-safe { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 56px; padding: 0 20px; border-radius: 14px; font-size: 17px; text-decoration: none; }
+.btn { border: 0; background: var(--gradient); color: #fff; font-weight: 600; }
+.btn:disabled { background: var(--disabled); color: var(--disabled-text); cursor: default; }
+.btn.busy:disabled { background: var(--gradient); color: #fff; opacity: .75; }
+.btn2 { border: 1px solid var(--outline); background: var(--surface); color: var(--ink); font-weight: 500; }
+.btn2:disabled { color: var(--disabled-text); cursor: default; }
+.btn2.out { color: var(--bad); }
+.btn-safe { border: 0; background: var(--ink); color: #fff; font-weight: 600; }
+.btn-safe:disabled { opacity: .7; cursor: default; }
+.btn svg, .btn2 svg, .btn-safe svg { width: 20px; height: 20px; flex: none; }
+:is(.btn, .btn2, .btn-safe, .icon-btn, .opt, .nav-row, .call, .text-link, .choice):focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.spin { width: 100%; height: 100%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
 
-/* Home: status with a green check, then list rows with an icon and an arrow. */
-.home .title { margin-top: 40px; margin-bottom: 24px; }
-.ready { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.ready svg { width: 24px; height: 24px; flex: none; }
-.rows { width: 100%; margin: 28px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
-.rows li { border-bottom: 1px solid var(--line); }
-.row { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 12px 4px; border: 0; background: none; color: inherit; font-size: 16px; text-align: left; text-decoration: none; }
-.row > svg { width: 22px; height: 22px; flex: none; }
-.row-text { flex: 1; display: flex; flex-direction: column; }
-.row-detail { font-size: 14px; color: var(--muted); }
-.logout { align-self: center; margin-top: 20px; }
-/* After "I'm safe": one line per contact who was told she's safe. */
-.safe-update { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -6px 0 14px; color: var(--ink); text-align: center; }
-.safe-update svg { width: 20px; height: 20px; flex: none; }
-.safe-update.error { color: var(--error); }
+/* Fields: white, 56 px, rounded 14 px. Indian mobiles have a fixed +91 in front. */
+.fl { display: flex; flex-direction: column; gap: 8px; }
+.lbl { font-size: 14px; font-weight: 500; }
+.field { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 16px; border: 1px solid var(--outline); border-radius: 14px; background: var(--surface); font-size: 17px; }
+.field:focus-within { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.field.bad { padding: 0 15px; border: 2px solid var(--bad); box-shadow: none; }
+.field.off { background: #F7F0F4; }
+.field input { flex: 1; min-width: 0; height: 54px; padding: 0; border: 0; outline: 0; background: transparent; font-size: 17px; color: var(--ink); }
+.field input::placeholder { color: var(--placeholder); }
+.sep { width: 1px; height: 22px; flex: none; background: var(--line); }
+.hint { font-size: 14px; color: var(--muted); }
+.errt { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--bad); }
+.errt svg { width: 16px; height: 16px; flex: none; }
 
-/* "Call me" on Home: the one large action, a call-gradient circle with a blush ring and soft glow, as on the
-   builder's Home board. */
-.call-ring { display: grid; place-items: center; width: 232px; height: 232px; margin: 4px auto 16px; }
-.call-me { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 200px; height: 200px; padding: 0; border: 0; border-radius: 50%; background: var(--gradient); color: #fff; font-size: 24px; font-weight: 600; letter-spacing: -.01em; box-shadow: 0 0 0 12px var(--tint), 0 18px 40px -12px rgba(154, 77, 150, .45); }
-.call-me svg { width: 38px; height: 38px; }
-.call-me:focus-visible { outline: 3px solid var(--ink); outline-offset: 16px; }
-.call-me:active { transform: scale(.98); }
-.call-caption { margin-bottom: 18px; text-align: center; color: var(--muted); }
+/* Notes: info in blush, problems in red, good news in green. */
+.note { display: flex; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 14px; font-size: 15px; line-height: 1.4; text-align: left; }
+.note svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.note small { display: block; font-size: 13px; opacity: .85; }
+.note b { font-weight: 600; }
+.note.box { flex-direction: column; gap: 12px; padding: 16px; border-radius: 16px; }
+.note.box > div { display: flex; gap: 10px; align-items: flex-start; }
+.n-info { background: var(--tint); color: var(--ink); }
+.n-bad { background: var(--bad-bg); color: var(--bad-text); }
+.n-ok { background: var(--ok-bg); color: var(--ok-text); }
+.notes { display: flex; flex-direction: column; gap: 10px; }
 
-/* Safety session: orb, the call's status, whether location is reaching Convex, "I'm safe". */
-.session .orb { margin-top: 0; }
-.session .status { margin: 0 0 10px; }
-.location { margin-bottom: 28px; color: var(--muted); }
-.location.error { color: var(--error); }
-/* The alert card: quiet and readable, never a red SOS screen. */
-.alert-card { width: 100%; margin: 0 0 28px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-align: left; }
-.alert-status { display: flex; align-items: flex-start; gap: 10px; font-weight: 600; }
-.alert-status svg { width: 22px; height: 22px; flex: none; margin-top: 1px; }
-.alert-status.error { color: var(--error); }
-.alert-location { margin-top: 12px; color: var(--muted); }
-.alert-location .text-link { min-height: 44px; padding-left: 0; }
+/* The A · Voice logo: a dot with voice waves on the call gradient. */
+.logo { display: flex; align-items: center; justify-content: center; flex: none; background: var(--gradient); }
+.logo svg { width: 65%; height: 65%; }
+.logo.s32 { width: 32px; height: 32px; border-radius: 10px; }
+.logo.s40 { width: 40px; height: 40px; border-radius: 12px; }
+.logo.s72 { width: 72px; height: 72px; border-radius: 20px; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
 
-/* Trusted contacts: choosing between a contact's numbers, and the button under the list. */
-.choices { border: 0; padding: 0; margin-left: 0; margin-right: 0; }
-.choices legend { padding: 0; }
-.choice { display: flex; align-items: center; gap: 12px; min-height: 48px; font-size: 16px; }
-.choice input { width: 22px; height: 22px; margin: 0; accent-color: var(--from); }
-.list-actions { margin-top: 24px; }
+/* Welcome: the walk-home illustration fills the space above the headline. */
+.screen.welcome { padding-top: 56px; gap: 0; }
+.hero { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; margin: 8px -24px 0; }
+.hero svg { width: 100%; max-width: 390px; height: auto; max-height: 400px; }
+.welcome .h-xl { margin-bottom: 40px; }
+
+/* Home: greeting, the Call me circle with its blush ring, readiness, and the rows. */
+.hi { font-size: 17px; font-weight: 500; }
+.home-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 16px 0; }
+.home-center.compact { gap: 24px; }
+.call { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; width: 208px; height: 208px; flex: none; padding: 0; border: 0; border-radius: 50%; background: var(--gradient); color: #fff; box-shadow: 0 0 0 12px var(--tint), 0 18px 40px -12px rgba(154, 77, 150, .45); }
+.call svg { width: 34px; height: 34px; }
+.call span { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+.call.small { width: 184px; height: 184px; gap: 10px; }
+.call.small svg { width: 30px; height: 30px; }
+.call.dim { background: #E7D9E2; color: var(--disabled-text); box-shadow: 0 0 0 12px var(--tint); cursor: default; }
+.call:active:not(.dim) { transform: scale(.98); }
+.caption { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.ready { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--ready-text); }
+.ready i { width: 8px; height: 8px; border-radius: 50%; background: var(--safe); }
+.nav { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.nav-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 56px; padding: 0; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font-size: 16px; text-align: left; text-decoration: none; }
+.nav-row .mut { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 15px; }
+.nav-row svg { width: 18px; height: 18px; }
+.warn { color: var(--warn-text); font-weight: 500; }
+
+/* Setup steps: progress bar, the two ways to add a contact, the “Which number?” sheet, “Contact saved”. */
+.bar { display: flex; gap: 6px; width: 72px; }
+.bar span { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+.bar .on { background: var(--from); }
+.opts { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.opt { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 76px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: left; }
+.opt b { display: block; font-size: 17px; font-weight: 600; }
+.opt small { display: block; margin-top: 2px; font-size: 14px; color: var(--muted); }
+.ic { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--tint); color: var(--from); }
+.ic svg { width: 22px; height: 22px; }
+.scrim { position: fixed; inset: 0; z-index: 10; background: rgba(42, 22, 48, .4); }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 11; max-width: 440px; margin: 0 auto; padding: 12px 24px 40px; display: flex; flex-direction: column; gap: 16px; border-radius: 24px 24px 0 0; background: var(--surface); }
+.grab { width: 40px; height: 5px; align-self: center; border-radius: 3px; background: var(--outline); }
+.sheet h2 { margin-top: 8px; font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+.sheet .sub { font-size: 15px; }
+.choice { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 0 16px; border: 1px solid var(--line); border-radius: 14px; font-size: 16px; cursor: pointer; }
+.choice:has(input:checked) { padding: 0 15px; border: 2px solid var(--from); background: #FAF5FC; }
+.choice input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--from); }
+.done { display: flex; align-items: center; justify-content: center; width: 96px; height: 96px; margin-bottom: 8px; border-radius: 50%; background: var(--ok-bg); color: var(--ready-text); }
+.done svg { width: 40px; height: 40px; }
+.card { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); text-align: left; }
+.card small { display: block; font-size: 14px; color: var(--muted); }
+.av { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--tint); color: var(--from); font-size: 15px; font-weight: 600; }
+
+/* Trusted contacts list. */
+.people { display: flex; flex-direction: column; margin: 16px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.person { display: flex; align-items: center; gap: 14px; min-height: 72px; border-bottom: 1px solid var(--line); font-size: 17px; }
+.person small { display: block; margin-top: 2px; font-size: 14px; color: var(--muted); }
+.person .av { width: 44px; height: 44px; font-size: 16px; }
+
+/* Round status discs: the call, practising the phrase, problems. */
+.disc { display: flex; align-items: center; justify-content: center; width: 112px; height: 112px; flex: none; margin-bottom: 8px; border-radius: 50%; }
+.disc svg { width: 40px; height: 40px; }
+.disc.sm { width: 104px; height: 104px; margin-bottom: 6px; }
+.disc.sm svg { width: 36px; height: 36px; }
+.d-call { background: var(--gradient); color: #fff; box-shadow: 0 0 0 12px var(--tint); }
+.d-ring { background: var(--gradient); color: #fff; box-shadow: 0 0 0 12px #EBD7E6, 0 0 0 26px var(--tint); }
+.disc.d-ring { margin: 20px 0 24px; }
+.d-listen { margin: 40px 0; background: var(--gradient); color: #fff; box-shadow: 0 0 0 12px #EBD7E6, 0 0 0 26px var(--tint), 0 0 0 40px #F8EEF4; }
+.d-ok { background: var(--ok-bg); color: var(--ready-text); }
+.d-bad { background: var(--bad-bg); color: var(--bad); }
+.phrase { padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); font-size: 20px; font-weight: 500; text-align: center; overflow-wrap: anywhere; }
+
+/* Safety session: timer, location chip, the call's state, cards, “I'm safe”. */
+.lab { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 999px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.chip i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.c-on { background: var(--ok-bg); color: var(--ok-text); }
+.c-pause { background: var(--pause-bg); color: var(--pause-text); }
+.c-off { background: var(--disabled); color: #5B4C58; }
+.callstate { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 24px 0 8px; text-align: center; }
+.callstate .sub { font-size: 16px; }
+.screen.session { gap: 14px; }
 
 /* Demo page. */
-.intro { margin-bottom: 24px; text-align: center; }
-.next-question { margin-bottom: 4px; text-align: center; }
+.demo-title { margin-top: 16px; }
+.demo-field { margin-top: 24px; }
+.demo-disc { width: 120px; height: 120px; margin-bottom: 12px; }
+.demo-disc svg { width: 44px; height: 44px; }
+
+/* Settings and the saved code word. */
+.grp { margin-top: 16px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.facts { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.fact { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--line); font-size: 16px; }
+.fact .mut { color: var(--muted); font-size: 15px; text-align: right; overflow-wrap: anywhere; }
+.vault { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 16px; padding: 28px 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); text-align: center; }
+.lock { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: var(--tint); color: var(--from); }
+.lock svg { width: 28px; height: 28px; }
+.dots { font-size: 26px; letter-spacing: .3em; }
+.saved { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--ok-bg); color: var(--ok-text); font-size: 14px; font-weight: 500; }
+.saved svg { width: 16px; height: 16px; }

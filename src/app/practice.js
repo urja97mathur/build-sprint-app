@@ -35,8 +35,9 @@ export function similarity(phrase, heard) {
 
 export const phraseMatches = (phrase, heard) => similarity(phrase, heard) >= 0.75;
 
-// Listens once and resolves with what was heard ({ heard: [...] }) or the browser's error ({ error }).
-export function listenOnce(lang = 'en-IN', timeoutMs = 12000) {
+// Listens once and resolves with what was heard ({ heard: [...] }), the browser's error ({ error }), or
+// { cancelled: true } when `signal` aborts. `onSpeech` runs when she starts speaking.
+export function listenOnce({ lang = 'en-IN', timeoutMs = 12000, onSpeech, signal } = {}) {
   return new Promise(resolve => {
     let settled = false;
     let recognition;
@@ -47,12 +48,14 @@ export function listenOnce(lang = 'en-IN', timeoutMs = 12000) {
       resolve(result);
     };
     const timer = setTimeout(() => { recognition?.abort(); finish({ heard: [] }); }, timeoutMs);
+    signal?.addEventListener('abort', () => { recognition?.abort(); finish({ cancelled: true }); });
     try {
       recognition = new Recognition();
       recognition.lang = lang;
       recognition.interimResults = false;
       recognition.continuous = false;
       recognition.maxAlternatives = 5;
+      recognition.onspeechstart = () => onSpeech?.();
       recognition.onresult = event => finish({ heard: Array.from(event.results[0] ?? [], alternative => alternative.transcript) });
       recognition.onerror = event => finish({ error: event.error });
       recognition.onend = () => finish({ heard: [] });

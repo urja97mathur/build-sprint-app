@@ -3,88 +3,131 @@ import { useAction, useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../convex/_generated/api.js';
 import { startCall } from './session.jsx';
-import { ChevronRight, LockIcon, PersonIcon, PhoneIcon, PlayIcon, ReadyIcon, Status, clearFlash, go, readFlash } from './ui.jsx';
+import {
+  AlertIcon, Back, CheckIcon, ChevronRight, ClockIcon, InfoIcon, Logo, PhoneIcon, PinOffIcon, Spinner, Top,
+  clearFlash, firstName, go, readFlash, showPhone,
+} from './ui.jsx';
 
-const MISSING = { phone: 'Add your mobile number', contact: 'Add a trusted contact', codeword: 'Choose your code phrase' };
-const HEADLINE = 'A voice with you on your walk.';
+const NEXT = {
+  phone: 'Add the mobile number we’ll ring.',
+  contact: 'Add a trusted contact we can alert.',
+  codeword: 'Choose the code phrase you’ll say on a call.',
+};
+const COUNT = ['', 'One step left.', 'Two steps left.', 'Three steps left.'];
 
 // After "I'm safe": whether each contact who got an alert was told she's safe. "Told" means WhatsApp accepted it.
-const SAFE_LINES = {
-  sending: name => ({ text: `Telling ${name} you’re safe…` }),
-  sent: name => ({ text: `Told ${name} you’re safe`, done: true }),
-  failed: name => ({ text: `Couldn’t tell ${name} you’re safe.`, error: true }),
-  unconfirmed: name => ({ text: `We couldn’t confirm ${name} was told you’re safe.`, error: true }),
-};
-function SafeUpdates() {
+function SessionEnded({ flash }) {
   const updates = useQuery(api.safety.safeUpdates) ?? [];
-  return updates.map(update => {
-    const line = SAFE_LINES[update.status](update.contactName ?? 'your contact');
-    return (
-      <p key={update.id} className={`safe-update${line.error ? ' error' : ''}`} role="status">
-        {line.done && <ReadyIcon />}<span>{line.text}</span>
-      </p>
-    );
-  });
+  if (!flash && !updates.length) return null;
+  const name = update => update.contactName ?? 'your contact';
+  const failed = updates.filter(update => update.status === 'failed' || update.status === 'unconfirmed');
+  return (
+    <>
+      <div className="note box n-ok" role="status">
+        {flash && <div><PinOffIcon /><span><b>Session ended.</b> Location sharing stopped.</span></div>}
+        {updates.filter(update => update.status === 'sent').map(update => (
+          <div key={update.id}><CheckIcon /><span>Told {name(update)} you’re safe</span></div>
+        ))}
+        {updates.filter(update => update.status === 'sending').map(update => (
+          <div key={update.id}><ClockIcon /><span>Telling {name(update)} you’re safe…</span></div>
+        ))}
+      </div>
+      {failed.map(update => (
+        <div key={update.id} className="note n-bad" role="alert">
+          <AlertIcon />
+          <span>{update.status === 'failed' ? `Couldn’t tell ${name(update)} you’re safe.` : `We couldn’t confirm ${name(update)} was told you’re safe.`}</span>
+        </div>
+      ))}
+    </>
+  );
 }
 
-// Home after sign-in: "Call me" once setup is ready, otherwise the missing step.
+function Row({ href, onClick, label, detail, warn = false }) {
+  const inside = <><span>{label}</span><span className={`mut${warn ? ' warn' : ''}`}>{detail}<ChevronRight /></span></>;
+  return href
+    ? <a className="nav-row" href={href}>{inside}</a>
+    : <button type="button" className="nav-row" onClick={onClick}>{inside}</button>;
+}
+
+// Home after sign-in: Call me once setup is ready, otherwise what's left to do.
 export function Home({ status }) {
-  const { signOut } = useAuthActions();
   const start = useAction(api.safety.start);
-  const [leaving, setLeaving] = useState(false);
   const [flash] = useState(readFlash);
   useEffect(() => clearFlash(), []);
+  const greeting = firstName(status.name);
+  const top = <Top back={<p className="hi">{greeting ? `Hi, ${greeting}` : 'Hi'}</p>} right={<Logo size={40} label="Companion logo" />} />;
 
-  async function logOut() {
-    setLeaving(true);
-    try { await signOut(); } finally { go('login', { replace: true }); }
-  }
   function callMe() {
     startCall(start);
     go('session');
   }
 
-  return (
-    <main className="ui home">
-      <h1 className="title center">{HEADLINE}</h1>
-      {status.nextStep ? (
-        <div className="actions">
-          <Status message={MISSING[status.nextStep]} center />
-          <button type="button" className="primary" onClick={() => go(status.nextStep)}>Finish setup</button>
+  if (status.nextStep) {
+    const left = [!status.hasPhone, !status.contacts, !status.codeWordSaved].filter(Boolean).length;
+    return (
+      <main className="screen tight">
+        {top}
+        <div className="home-center compact">
+          <button type="button" className="call small dim" disabled><PhoneIcon /><span>Call me</span></button>
+          <p className="sub">Call me works once setup is done.</p>
         </div>
-      ) : (
-        <>
-          <div className="call-ring">
-            <button type="button" className="call-me" onClick={callMe}><PhoneIcon /><span>Call me</span></button>
-          </div>
-          <p className="call-caption">Feel unsafe? We’ll call you right now.</p>
-          {flash && <Status message={flash} center />}
-          <SafeUpdates />
-          <p className="ready" role="status"><ReadyIcon /> Safety setup ready</p>
-        </>
-      )}
-      <ul className="rows">
-        <li>
-          <button type="button" className="row" onClick={() => go('contacts')}>
-            <PersonIcon /><span className="row-text">Trusted contacts</span><ChevronRight />
-          </button>
-        </li>
-        <li>
-          {status.codeWordSaved ? (
-            <div className="row">
-              <LockIcon /><span className="row-text">Code word</span><span className="row-detail">Saved</span>
-            </div>
-          ) : (
-            <button type="button" className="row" onClick={() => go('codeword')}>
-              <LockIcon /><span className="row-text">Code word</span><ChevronRight />
-            </button>
-          )}
-        </li>
-        <li>
-          <a className="row" href="/demo.html"><PlayIcon /><span className="row-text">Try demo</span><ChevronRight /></a>
-        </li>
-      </ul>
-      <button type="button" className="text-link logout" disabled={leaving} onClick={logOut}>Log out</button>
+        <div className="note box n-info">
+          <div><InfoIcon /><span><b>{COUNT[left]}</b> {NEXT[status.nextStep]}</span></div>
+          <button type="button" className="btn" onClick={() => go(status.nextStep)}>Finish setup</button>
+        </div>
+        <nav className="nav" aria-label="Your setup">
+          <Row onClick={() => go(status.contacts ? 'contacts' : 'contact')} label="Trusted contacts" detail={status.contacts} />
+          <Row onClick={() => go('codeword')} label="Code word" detail={status.codeWordSaved ? 'Saved' : 'Not set'} warn={!status.codeWordSaved} />
+        </nav>
+      </main>
+    );
+  }
+
+  return (
+    <main className="screen tight">
+      {top}
+      <SessionEnded flash={flash} />
+      <div className={`home-center${flash ? ' compact' : ''}`}>
+        <button type="button" className={`call${flash ? ' small' : ''}`} onClick={callMe}><PhoneIcon /><span>Call me</span></button>
+        <div className="caption">
+          <p className="sub">Feel unsafe? We’ll call you now.</p>
+          <p className="ready"><i />Ready to call</p>
+        </div>
+      </div>
+      <nav className="nav" aria-label="Your safety call">
+        <Row onClick={() => go('contacts')} label="Trusted contacts" detail={status.contacts} />
+        <Row onClick={() => go('codeword')} label="Code word" detail="Saved" />
+        <Row href="/demo.html" label="Hear a demo call" />
+        <Row onClick={() => go('settings')} label="Settings" />
+      </nav>
+    </main>
+  );
+}
+
+// Her account, and Log out.
+export function Settings() {
+  const account = useQuery(api.setup.account);
+  const { signOut } = useAuthActions();
+  const [leaving, setLeaving] = useState(false);
+
+  async function logOut() {
+    setLeaving(true);
+    try { await signOut(); } finally { go('login', { replace: true }); }
+  }
+
+  return (
+    <main className="screen">
+      <Top back={<Back to="home" label="Back to home" />} />
+      <h1 className="h-md">Settings.</h1>
+      <p className="grp">Your account</p>
+      <div className="facts">
+        <div className="fact"><span>Name</span><span className="mut">{account?.name ?? '…'}</span></div>
+        <div className="fact"><span>Email</span><span className="mut">{account?.email ?? '…'}</span></div>
+        <div className="fact"><span>Mobile number</span><span className="mut">{account ? showPhone(account.phone) || 'Not added' : '…'}</span></div>
+      </div>
+      <div className="grow" />
+      <button type="button" className="btn2 out" disabled={leaving} onClick={logOut}>{leaving ? 'Logging out…' : 'Log out'}</button>
+      <p className="fine">Companion · test version</p>
     </main>
   );
 }
@@ -96,14 +139,25 @@ export function Loading() {
     const timer = setTimeout(() => setLate(true), 10000);
     return () => clearTimeout(timer);
   }, []);
-  if (!late) return <main className="ui middle"><Status message="Loading your safety setup…" center /></main>;
+  if (!late) {
+    return (
+      <main className="screen">
+        <div className="center">
+          <Logo size={72} />
+          <div style={{ width: 28, height: 28 }}><Spinner /></div>
+          <p className="sub" role="status">Loading your safety setup…</p>
+        </div>
+      </main>
+    );
+  }
   return (
-    <main className="ui middle">
-      <Status message="Couldn’t load your safety setup" error center />
-      <div className="actions">
-        <button type="button" className="primary" onClick={() => location.reload()}>Try again</button>
-        <a className="secondary" href="/demo.html">Try demo</a>
+    <main className="screen">
+      <div className="center">
+        <div className="disc d-bad" style={{ width: 72, height: 72, marginBottom: 0 }}><AlertIcon /></div>
+        <p className="st" role="alert">Couldn’t load your safety setup.</p>
+        <p className="sub">Check your connection, then try again.</p>
       </div>
+      <button type="button" className="btn" onClick={() => location.reload()}>Try again</button>
     </main>
   );
 }

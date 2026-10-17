@@ -4,8 +4,8 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../convex/_generated/api.js';
 import { Account, Login, ProfileStep, Welcome } from './signin.jsx';
 import { AddContact, ContactList } from './contacts.jsx';
-import { CodeWord } from './codeword.jsx';
-import { Home, Loading } from './home.jsx';
+import { CodeWord, CodeWordSaved } from './codeword.jsx';
+import { Home, Loading, Settings } from './home.jsx';
 import { Session, callStarting } from './session.jsx';
 import { Redirect, useRoute } from './ui.jsx';
 
@@ -31,12 +31,13 @@ export default function App() {
 
   switch (route) {
     case 'home': return <Home status={status} />;
-    case 'session': return status.activeSession || callStarting() ? <Session /> : <Redirect to="home" />;
+    case 'session': return status.activeSession || callStarting() ? <Session contactName={status.firstContact} /> : <Redirect to="home" />;
     case 'phone': return status.hasPhone ? <Redirect to={status.nextStep ?? 'home'} /> : <ProfileStep step="phone" />;
     case 'contacts': return <ContactList />;
     case 'contact': return <AddContact nextStep={status.nextStep} />;
     case 'add-contact': return <AddContact fromList />;
-    case 'codeword': return status.codeWordSaved ? <Redirect to="home" /> : <CodeWord />;
+    case 'codeword': return status.codeWordSaved ? <CodeWordSaved contactName={status.firstContact} /> : <CodeWord contactName={status.firstContact} />;
+    case 'settings': return <Settings />;
     default: return <Redirect to={status.nextStep ?? 'home'} />;
   }
 }

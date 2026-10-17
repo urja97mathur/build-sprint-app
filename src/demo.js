@@ -4,28 +4,44 @@ import './ui.css';
 // Public demo before sign-up. All limits are checked in Convex; this page only reports what Convex says.
 const form = document.querySelector('#demo');
 const input = document.querySelector('#phone');
+const field = document.querySelector('#phone-field');
 const button = document.querySelector('#call');
-const status = document.querySelector('#status');
-const next = document.querySelector('#next'); // "Would this feel natural on your walk?", once she's had her demo
+const note = document.querySelector('#note');
+const actions = document.querySelector('#actions');
+const used = document.querySelector('#used'); // "Set up my safety call" / "Back to start", once this number had its demo
+const after = document.querySelector('#after'); // "Would this feel natural on your walk?", once the call is requested
 // Only the public Convex address may enter the bundle. All Sarvam settings stay server-side.
 const origin = import.meta.env.VITE_CONVEX_URL
   ? import.meta.env.VITE_CONVEX_URL.replace(/\.convex\.cloud$/, '.convex.site')
   : location.origin;
 const UNCONFIRMED = 'We couldn’t confirm the call request. It may still ring. Check your phone before trying again.';
 
+// The note's icons: information, a clock (full today), a problem.
+const ICONS = {
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  bad: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/>',
+};
+
 let ready = false;
 let busy = false;
 let done = false; // after a requested or unconfirmed call: never retry automatically
 
-function show(message, error = false) {
-  status.textContent = message;
-  status.classList.toggle('error', error);
+// A note above the buttons: kind 'info' (blush) or 'bad' (red), with an icon. No text hides it.
+function show(text, kind = 'info', icon = kind) {
+  note.hidden = !text;
+  if (!text) return;
+  note.className = `note n-${kind === 'bad' ? 'bad' : 'info'}`;
+  note.setAttribute('role', kind === 'bad' ? 'alert' : 'status');
+  note.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">${ICONS[icon]}</svg><span></span>`;
+  note.querySelector('span').textContent = text;
 }
 // Same shape the server accepts: 10 digits starting 6–9, with or without +91, 91 or 0.
 const looksValid = value => /^(?:\+91|91|0)?[6-9]\d{9}$/.test(value.replace(/[\s()-]/g, ''));
 function update() {
   button.disabled = !ready || busy || done || !looksValid(input.value);
   input.disabled = busy || done;
+  field.classList.toggle('off', input.disabled);
 }
 
 async function check() {
@@ -33,18 +49,19 @@ async function check() {
     const response = await fetch(`${origin}/api/demo-call`, { signal: AbortSignal.timeout(15000) });
     if (!(await response.json()).ready) {
       show('The calling connection isn’t set up yet. Your phone won’t ring until it’s connected.');
-      button.textContent = 'Call not ready';
       return;
     }
     ready = true;
-    show('Ready when you are.');
     update();
   } catch {
-    show('Couldn’t check the call setup. Refresh to try again.', true);
+    show('Couldn’t check the call setup. Refresh to try again.', 'bad');
   }
 }
 
-input.addEventListener('input', update);
+input.addEventListener('input', () => {
+  if (!done && !busy && note.classList.contains('n-bad')) show('');
+  update();
+});
 form.addEventListener('submit', async event => {
   event.preventDefault();
   if (button.disabled) return;
@@ -52,8 +69,8 @@ form.addEventListener('submit', async event => {
   try { localStorage.setItem('walking-companion-phone', input.value.trim()); } catch {}
   busy = true;
   update();
+  show('');
   button.textContent = 'Requesting call…';
-  show('Asking your AI companion to call you…');
   try {
     const response = await fetch(`${origin}/api/demo-call`, {
       method: 'POST',
@@ -64,23 +81,32 @@ form.addEventListener('submit', async event => {
     const result = await response.json();
     if (response.ok) {
       done = true;
-      button.textContent = 'Call requested';
-      show('Call requested. Answer when your phone rings. This doesn’t confirm the call connected.');
-      next.hidden = false;
+      form.hidden = true;
+      after.hidden = false;
     } else if (result.uncertain) {
       done = true;
       button.textContent = 'Check your phone';
-      show(UNCONFIRMED, true);
+      show(UNCONFIRMED, 'bad');
+    } else if (response.status === 409) {
+      // This number already had its demo: offer the real thing instead.
+      done = true;
+      show(result.message);
+      actions.hidden = true;
+      used.hidden = false;
+    } else if (response.status === 429) {
+      // Full for today: nothing to retry until tomorrow.
+      done = true;
+      button.textContent = 'Call me';
+      show(result.message, 'info', 'clock');
     } else {
-      button.textContent = response.status === 424 ? 'Try again' : 'Call me';
-      show(result.message, true);
-      if (response.status === 409) next.hidden = false; // this number already had its demo
+      button.textContent = 'Call me';
+      show(result.message, 'bad');
     }
   } catch {
     // The request may have reached Sarvam before the connection failed.
     done = true;
     button.textContent = 'Check your phone';
-    show(UNCONFIRMED, true);
+    show(UNCONFIRMED, 'bad');
   }
   busy = false;
   update();

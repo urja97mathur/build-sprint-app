@@ -2,6 +2,20 @@
 
 Read this before building or changing any screen. If a choice isn't covered here, ask me instead of guessing.
 
+## The source of truth since 2026-10-18: the builder's canvas
+
+Every public screen is built from the builder's Design canvas **“Safety Call — Minimal Redesign”** (https://claude.ai/artifact/4uwayGhiCwyHdJybwKZxvt): 15 screens with their states, the A · Voice logo and the palette. Where this file's older sections disagree, the canvas wins; they're kept for their rules (separate “sent” / “delivered” / “acknowledged”, never claiming more than the app knows). Shared look in `src/ui.css`: blush-white background, plum text, Geist, big left-aligned titles (40/34/32/28 px), 56 px buttons and fields rounded 14 px, the call gradient for the main action, plum for “I'm safe”, actions at the bottom. Screenshots of every screen and state: `artifacts/redesign/` (34 files).
+
+Deliberate differences from the canvas (builder's yes, 2026-10-18), so no screen claims more than the app does:
+
+- Session: “Your location is saved for this session. Asha gets it only if you need help.” (not “Sharing your location with Asha”); “Simran will ring +91…” (not “is ringing”); alert cards give the location's time (“with your location from 9:38 pm”), never “live”; “Location paused · Last update … Keep this page open to keep sharing.” and “Couldn't place the call. Try again in a moment.” (no “check your signal”). The canvas's map link on alert cards is not shown.
+- Code phrase: “Simran won't mention it.” (not “whoever is nearby won't know”); after practice “Simran listens for this phrase on your calls.”; Save appears only after a successful practice, with no “Save without practising”; the hint keeps “You can't change it later.” In a browser without speech recognition, practice and saving stay unavailable (“Open this link in Chrome to practise and save your phrase.”), as AGENTS.md requires.
+- Create account: “A few quick steps after this…”; no Terms / Privacy line until those pages exist. Settings shows “Companion · test version”.
+- Contacts: “Let Asha know you've chosen them”; “Pick the one they always pick up”; the list says “We alert your first contact if you need help on a walk.” and Add another “Alerts go to your first contact for now.” (only the first contact gets alerts in this version). Contact rows have no arrow (there's no contact detail screen). The contact number field has a fixed +91; international numbers from the phone's contacts are still accepted.
+- Screens reached right after sign-in (mobile number, Step 1, Step 2 choose) have no back arrow, because there's no earlier screen to go back to.
+- Demo after the call adds “Call requested. Answer when your phone rings.” above “Would this feel natural on your walk?”, since the page can't tell when the call ended.
+- Not built: the Log in error screenshot (the same red note appears whenever Google sign-in can't open).
+
 ## Call page (real phone call) — updated 2026-10-07
 
 The product uses a real phone call: she taps “Call me”, her phone rings, she answers, and the conversation happens on her phone's call screen, not on the page. The private call page is at `/call-test.html` (moved from the main address on 2026-10-10). White screen. Top to bottom:

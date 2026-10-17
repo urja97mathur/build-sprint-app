@@ -16,13 +16,15 @@ const contactsOf = (ctx, userId) => ctx.db.query('trustedContacts').withIndex('b
 const phraseOf = (ctx, userId) => ctx.db.query('codePhrases').withIndex('by_user', q => q.eq('userId', userId)).first();
 
 // What's saved, which step is missing, and any safety session in progress. Never returns the code phrase or her number.
+// `firstContact` is the name of the contact who gets her alerts, for the screens' words.
 export const status = query({
   args: {},
   handler: async ctx => {
     const userId = await getAuthUserId(ctx);
     const user = userId && (await ctx.db.get(userId));
     if (!user) return null;
-    const contacts = (await contactsOf(ctx, userId)).length;
+    const contactList = await contactsOf(ctx, userId);
+    const contacts = contactList.length;
     const codeWordSaved = Boolean(await phraseOf(ctx, userId));
     const hasPhone = Boolean(user.phone);
     const session = await ctx.db.query('safetySessions').withIndex('by_user_status', q => q.eq('userId', userId).eq('status', 'active')).first();
@@ -30,10 +32,22 @@ export const status = query({
       name: user.name ?? null,
       hasPhone,
       contacts,
+      firstContact: contactList[0]?.name ?? null,
       codeWordSaved,
       nextStep: nextStep({ name: user.name, hasPhone, contacts, codeWordSaved }),
       activeSession: session?._id ?? null,
     };
+  },
+});
+
+// Settings: her own name, email and mobile number, shown only to her.
+export const account = query({
+  args: {},
+  handler: async ctx => {
+    const userId = await getAuthUserId(ctx);
+    const user = userId && (await ctx.db.get(userId));
+    if (!user) return null;
+    return { name: user.name ?? null, email: user.email ?? null, phone: user.phone ?? null };
   },
 });
 
