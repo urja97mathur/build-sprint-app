@@ -1,3 +1,4 @@
+import '@fontsource-variable/geist';
 import './ui.css';
 
 // Public demo before sign-up. All limits are checked in Convex; this page only reports what Convex says.

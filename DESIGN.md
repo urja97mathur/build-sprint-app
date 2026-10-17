@@ -97,7 +97,9 @@ The mockup also shows a full active-call screen: “Connected to your AI compani
 
 ## 3. Type and colour
 
-Font: The device’s system font. Use the same family throughout the app.
+**Palette and font since 2026-10-17** (the builder's canvas “Safety Call — Minimal Redesign”, palette board; this replaces the font and colours below, kept for reference). Font: **Geist** (variable, bundled with the site from `@fontsource-variable/geist`, OFL licence), headlines weight 600 with slightly tight letter spacing. Colours, as tokens at the top of `src/ui.css`: background blush white **#FBF7F8**; text plum ink **#2A1630**; secondary text mauve grey **#6E5F6B**; main buttons and the “Call me” circle use the call gradient **#7A4CC2 → #B84D78** with white labels (4.8:1 or more); blush tint **#F3E6EE** for the ring around “Call me”; white buttons and cards **#FFFFFF** with outline **#E6D6DF**, dividers **#EEE3E8**; safe green **#1E8A4C** for status only; errors stay red **#B91C1C**; unavailable buttons blush **#EFE3EA** with **#8A7A86** labels. Two deliberate differences from the canvas: field borders are a deeper mauve **#9A8794** (3.3:1) so fields stay visible, and field example text is **#7A6A77**. The orb keeps its shape in the palette: body **#DCC8EE → #F6EAF1**, swirls lavender **#8F5FCB** and rose **#C2638F**, streaks **#FFF6FA** (builder's yes, 2026-10-17). Screenshots: `artifacts/palette/`. The canvas's logo, layouts and words are not applied.
+
+Font (until 2026-10-17): The device’s system font. Use the same family throughout the app.
 
 Sizes (for the web app, in CSS pixels):
 

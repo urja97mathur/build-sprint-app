@@ -59,7 +59,7 @@ export const PhoneIcon = () => (
 );
 export const ReadyIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <circle cx="12" cy="12" r="11" fill="#16A34A" />
+    <circle cx="12" cy="12" r="11" fill="#1E8A4C" />
     <path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
@@ -111,8 +111,8 @@ export function Orb() {
     <svg className="orb" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
       <defs>
         <radialGradient id="orb-body" cx="45%" cy="42%" r="62%">
-          <stop offset="0" stopColor="#A9CCF6" />
-          <stop offset="1" stopColor="#D6E8FB" />
+          <stop offset="0" stopColor="#DCC8EE" />
+          <stop offset="1" stopColor="#F6EAF1" />
         </radialGradient>
         <radialGradient id="orb-fade">
           <stop offset=".93" stopColor="#fff" />
@@ -125,11 +125,11 @@ export function Orb() {
       <g mask="url(#orb-edge)">
         <circle cx="100" cy="100" r="100" fill="url(#orb-body)" />
         <g className="orb-swirl">
-          <g fill="#5B8DEF" filter="url(#orb-wide)">
-            <ellipse cx="114" cy="86" rx="46" ry="36" opacity=".9" />
-            <ellipse cx="60" cy="124" rx="40" ry="34" opacity=".95" />
+          <g filter="url(#orb-wide)">
+            <ellipse cx="114" cy="86" rx="46" ry="36" fill="#8F5FCB" opacity=".9" />
+            <ellipse cx="60" cy="124" rx="40" ry="34" fill="#C2638F" opacity=".95" />
           </g>
-          <g fill="none" stroke="#F5F9FF" strokeLinecap="round" filter="url(#orb-soft)" opacity=".75">
+          <g fill="none" stroke="#FFF6FA" strokeLinecap="round" filter="url(#orb-soft)" opacity=".75">
             <path d="M46 52 C 84 22, 150 34, 160 80" strokeWidth="22" />
             <path d="M98 108 C 80 140, 104 172, 156 150" strokeWidth="24" />
           </g>
