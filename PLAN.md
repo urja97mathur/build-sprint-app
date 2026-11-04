@@ -41,10 +41,12 @@ Run the thirty-minute, no-code voice check from PRODUCT.md while building. It ha
 
 ## Before launching to real users (WhatsApp alerts)
 
-Recorded 2026-10-14. This version uses Meta's free test number, which only reaches the up to 5 numbers the builder verified in Meta, so none of this is needed for testing.
+Recorded 2026-10-14. Since 2026-11-04 alerts go from the builder's Indian Vobiz number, not Meta's free test number, so they can reach any contact (up to 250 people a day until the business is verified).
+
+- **WhatsApp balance (added 2026-11-04):** WhatsApp is paid from a prepaid balance (₹50 by UPI to start, about ₹0.14 per delivered message). If it runs out, alerts stop, and the app can't tell: it still shows “Alert sent”. Top it up, or move to a card or automatic payments, before real users rely on it. Connecting webhooks would let the app see failed messages.
+- **Display name (added 2026-11-04):** the number is set to “Companion”, but Meta hasn't approved the name, so contacts see the number instead.
 
 - **Contacts agreeing to alerts:** WhatsApp's Business Messaging Policy lets a business message only people who agreed to hear from it, and her contact never did (she gave us their number). Nothing blocks the message, but contacts who block or report the unknown number can get it restricted, and an unexpected message from a business may be dismissed as spam. Options: a private agreement link she sends each contact (they tap “I agree to receive alerts”); a lighter checkbox where she confirms she told them; or accepting the risk. The builder's view (2026-10-14): like phone or Uber emergency contacts, choosing them should be enough.
-- **An Indian business number:** the alert comes from Meta's test number (+1 555…), which looks foreign. At launch, register a real Indian number as the WhatsApp business number with the display name “Companion”. Needs a dedicated SIM or number, business verification and Meta's per-message cost: builder's approval before paying.
 - **“Delivered” reports** (parked from milestone 5, 2026-10-14): WhatsApp reports delivered and read only through webhooks, which Meta sends only once the app is published (a privacy policy page, a data-deletion page, an icon and a category; business verification unconfirmed). Until then the app shows “Alert sent”, meaning WhatsApp accepted the message. `WHATSAPP_APP_SECRET` is for checking those webhooks.
 - **Sending from her own number:** WhatsApp doesn't allow automatic sending from a personal account (unofficial tools risk getting her own number banned). An installed Android app could send an SMS from her own number automatically, like the phone's SOS feature; consider it in the app version.
 
