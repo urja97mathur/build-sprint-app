@@ -8,10 +8,6 @@ if (access) {
   history.replaceState(null, '', location.pathname + location.search);
 }
 const token = sessionStorage.getItem('call-test-access') || '';
-// Only the public Convex address may enter the bundle. All Sarvam settings stay server-side.
-const origin = import.meta.env.VITE_CONVEX_URL
-  ? import.meta.env.VITE_CONVEX_URL.replace(/\.convex\.cloud$/, '.convex.site')
-  : location.origin;
 let requested = sessionStorage.getItem('call-test-requested') === 'yes';
 
 function show(message, error = false) {
@@ -19,7 +15,7 @@ function show(message, error = false) {
   status.classList.toggle('error', error);
 }
 async function request(path, method = 'GET') {
-  const response = await fetch(`${origin}/api/${path}`, {
+  const response = await fetch(`/api/${path}`, {
     method,
     headers: { Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(15000),

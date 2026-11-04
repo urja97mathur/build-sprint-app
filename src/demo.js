@@ -10,10 +10,6 @@ const note = document.querySelector('#note');
 const actions = document.querySelector('#actions');
 const used = document.querySelector('#used'); // "Set up my safety call" / "Back to start", once this number had its demo
 const after = document.querySelector('#after'); // "Would this feel natural on your walk?", once the call is requested
-// Only the public Convex address may enter the bundle. All Sarvam settings stay server-side.
-const origin = import.meta.env.VITE_CONVEX_URL
-  ? import.meta.env.VITE_CONVEX_URL.replace(/\.convex\.cloud$/, '.convex.site')
-  : location.origin;
 const UNCONFIRMED = 'We couldn’t confirm the call request. It may still ring. Check your phone before trying again.';
 
 // The note's icons: information, a clock (full today), a problem.
@@ -46,7 +42,7 @@ function update() {
 
 async function check() {
   try {
-    const response = await fetch(`${origin}/api/demo-call`, { signal: AbortSignal.timeout(15000) });
+    const response = await fetch('/api/demo-call', { signal: AbortSignal.timeout(15000) });
     if (!(await response.json()).ready) {
       show('The calling connection isn’t set up yet. Your phone won’t ring until it’s connected.');
       return;
@@ -72,7 +68,7 @@ form.addEventListener('submit', async event => {
   show('');
   button.textContent = 'Requesting call…';
   try {
-    const response = await fetch(`${origin}/api/demo-call`, {
+    const response = await fetch('/api/demo-call', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone: input.value }),

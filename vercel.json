@@ -1,0 +1,7 @@
+{
+  "buildCommand": "VITE_CONVEX_URL=https://gregarious-canary-491.convex.cloud npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://gregarious-canary-491.convex.site/api/:path*" }
+  ]
+}
