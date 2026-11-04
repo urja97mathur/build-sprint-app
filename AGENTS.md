@@ -10,7 +10,7 @@ On 2026-10-06 the builder authorized a small real-phone-call test page: “Call 
 
 ## 1. How the product works
 
-**Interface:** A page on the project's `.convex.site` link. She opens it in a phone browser, with no install, and taps “Call me”. Sarvam calls her phone; she answers and talks with the AI companion on her phone's call screen. The page shows only what it can confirm, such as “Call requested”; it cannot yet tell whether the call was answered or ended. The look follows the builder's canvas “Safety Call — Minimal Redesign” (DESIGN.md, 2026-10-18): “Call me” is a large call-gradient circle on Home. The action count is four: “Call me”, answer, code phrase if needed, and “I’m safe”. The full product flow includes a code phrase for requesting help and “I’m safe” to close the safety session; how both work during a phone call is undecided (see PLAN.md).
+**Interface:** A page at https://companion-ashen.vercel.app (on Vercel since 2026-11-04; old `.convex.site` page links forward there). She opens it in a phone browser, with no install, and taps “Call me”. Sarvam calls her phone; she answers and talks with the AI companion on her phone's call screen. The page shows only what it can confirm, such as “Call requested”; it cannot yet tell whether the call was answered or ended. The look follows the builder's canvas “Safety Call — Minimal Redesign” (DESIGN.md, 2026-10-18): “Call me” is a large call-gradient circle on Home. The action count is four: “Call me”, answer, code phrase if needed, and “I’m safe”. The full product flow includes a code phrase for requesting help and “I’m safe” to close the safety session; how both work during a phone call is undecided (see PLAN.md).
 
 **Business logic:** During a real safety session, keep the AI conversation going and share location. Her code phrase triggers an emergency WhatsApp message (a manual alert button is parked for a future version); repeated missed check-ins trigger a check-on-her WhatsApp message. Try the next saved contact if the first does not respond. Ending only the call keeps the safety session, location sharing, and check-in monitoring active. Confirming “I’m safe” ends the session and location sharing and updates alerted contacts.
 
@@ -46,13 +46,14 @@ The contact page's “Call her” action requires her phone number. Hide that ac
 | Resend | Not used since 2026-10-16 (sign-in is Google only; email codes are parked). It delivered email login codes from 2026-10-10 with Resend's test sender, which only reaches the Resend account's own email until a domain is verified | `AUTH_RESEND_KEY` still in Convex server environment settings, unused |
 | Meta (WhatsApp) | Chosen 2026-10-14 for alert messages to trusted contacts, through the WhatsApp Cloud API, instead of SMS. WhatsApp's policy expects contacts to agree to receive messages; that and sending from her own number are to be decided before launch (PLAN.md). Since 2026-11-04 alerts go from the builder's Vobiz number on a prepaid balance that needs topping up; Vobiz only owns the number, and messages go through Meta. Business verification needs the builder's approval | Convex server environment settings |
 | Google (sign-in) | Approved 2026-10-15: “Continue with Google” through Convex Auth's Google provider; the only way to sign in since 2026-10-16. Only her name and email are kept, not her photo; a Google sign-in with the email of an existing account joins it and keeps her saved name. OAuth client in Google Cloud Console (project “Companion”); free | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` in Convex server environment settings |
+| Vercel | Chosen 2026-11-04 to host the website, on the free plan, built from GitHub. It holds no keys or data | None: `vercel.json` only has public addresses |
 | GitHub | Stores project code | Development tools; no GitHub secret in the client |
 
 Permanent service keys must never be embedded in the client or committed to GitHub. If connecting voice requires an additional backend or outside service, explain the concrete requirement and ask before adding it. Do not purchase services without the builder's approval.
 
 ### Browser before an installed app
 
-The page runs on `.convex.site`. The builder's direction is to skip an installed app unless the browser cannot do the job; this supersedes the earlier Android/iPhone app-first proposal. The voice is now a normal phone call, so the riskiest browser part is location.
+The page runs on Vercel, with Convex as the backend. The builder's direction is to skip an installed app unless the browser cannot do the job; this supersedes the earlier Android/iPhone app-first proposal. The voice is now a normal phone call, so the riskiest browser part is location.
 
 Test on both iPhone and Android phones, in the safety-call milestone:
 
@@ -66,9 +67,10 @@ Run on Android on 2026-10-12: the call kept going with the screen locked, but lo
 
 ### Hosting and tooling
 
-- Codex writes code; GitHub stores it; Convex provides database, backend, Convex Auth, and static website hosting.
-- Read the installed `.agents/skills/convex-dev-static-hosting/SKILL.md` before hosting work.
-- Deploying the website means `npm run deploy`; pushing to GitHub does not deploy it. In a non-interactive terminal, `npm run deploy` stops at Convex's confirmation prompt; run `npx convex deploy -y`, then `npx @convex-dev/static-hosting deploy --skip-convex`.
+- Codex writes code; GitHub stores it; Convex provides database, backend and Convex Auth; Vercel hosts the website (builder's decision, 2026-11-04).
+- Pushing to `main` on GitHub deploys the website: Vercel builds it using `vercel.json`, which also forwards `/api/…` to Convex. Pushing does not deploy the backend: run `npx convex deploy -y` yourself, and always before pushing a page that needs the new backend.
+- Vercel's free plan is for non-commercial use only. Charging users or running ads needs its paid plan, or another host: ask the builder first.
+- `SITE_URL` in Convex is where Google sign-in returns to, and sign-in only finishes there. If the website's address changes, update `SITE_URL`; the old `.convex.site` pages forward to it (`convex/lib/forward.js`). Google's return link stays on `.convex.site`.
 - Use applicable Build Sprint skills installed in this project.
 - Never use another host, database, or authentication service without asking the builder first.
 

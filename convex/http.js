@@ -6,6 +6,7 @@ import { handleCall } from './lib/call.js';
 import { handleDemoCall } from './lib/demo.js';
 import { handleCodeWord } from './lib/alerts.js';
 import { handleCallEnded } from './lib/checkins.js';
+import { OLD_PAGES, forwardToSite } from './lib/forward.js';
 import { auth } from './auth.js';
 
 const http = httpRouter();
@@ -37,6 +38,10 @@ http.route({
 
 // Convex Auth's public sign-in keys, at /.well-known/… where Convex looks for them.
 auth.addHttpRoutes(http);
+
+// The pages live on Vercel now; old links to them on this address forward there.
+const forward = httpAction((_ctx, request) => forwardToSite(request, process.env));
+for (const path of OLD_PAGES) http.route({ path, method: 'GET', handler: forward });
 
 // Everything else is the static site (call page, demo page, setup pages). Keep this last.
 registerStaticRoutes(http, components.staticHosting);
